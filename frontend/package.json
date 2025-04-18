@@ -10,14 +10,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@fontsource/roboto": "^5.2.5",
-    "@mui/icons-material": "^7.0.2",
-    "@mui/material": "^7.0.2",
+    "@chakra-ui/icons": "2.2.4",
+    "@chakra-ui/react": "2.10.7",
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.0",
+    "@fontsource/roboto": "5.2.5",
     "@tailwindcss/vite": "^4.1.4",
+    "framer-motion": "12.6.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hook-form": "7.55.0",
+    "react-router-dom": "7.4.0",
     "tailwindcss": "^4.1.4"
   },
   "devDependencies": {
