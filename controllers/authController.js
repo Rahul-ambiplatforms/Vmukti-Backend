@@ -70,6 +70,8 @@ exports.initiateLogin = async (req, res) => {
 exports.verifyOTP = async (req, res) => {
     try {
         const { email, otp } = req.body;
+      
+
 
         // 1. Find user
         const user = await User.findOne({ email });
@@ -88,7 +90,7 @@ exports.verifyOTP = async (req, res) => {
         }
 
         // 4. Clear OTP
-        user.otp = undefined;
+        // user.otp = undefined;
         await user.save();
 
         // 5. Generate JWT token
@@ -133,6 +135,7 @@ exports.getMe = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
+        
 
         // 1. Check if user exists
         const user = await User.findOne({ email });
