@@ -35,25 +35,48 @@ exports.createBlog = async (req, res) => {
       if (req.files) {
         // Handle main image
         if (req.files.mainImage) {
-          blogData.content.mainImage = `/uploads/${req.files.mainImage[0].filename}`;
+          console.log('[CONTROLLER] mainImage file(s) received:', req.files.mainImage.map(f => f.originalname));
+          blogData.content.mainImage = `${req.files.mainImage[0].filename}`;
+          console.log('[CONTROLLER] mainImage URL set to:', blogData.content.mainImage);
+        } else {
+          console.log('[CONTROLLER] No mainImage file received.');
         }
 
-        // Handle imageVideo files - exactly like mainImage
+        // Handle imageVideo files
         if (req.files.imageVideo && blogData.content.headingsAndImages) {
           const imageFiles = req.files.imageVideo;
-          let fileIndex = 0;
+          console.log('[CONTROLLER] imageVideo file(s) received:', imageFiles.map(f => f.originalname));
 
+          // Store all imageVideo filenames in the imageVideos array
+          blogData.content.imageVideos = imageFiles.map(file => file.filename);
+          console.log('[CONTROLLER] imageVideos array:', blogData.content.imageVideos);
+
+          // Update the headingsAndImages with file paths in the correct sequence
           blogData.content.headingsAndImages = blogData.content.headingsAndImages.map(item => {
-            if (item.type === 'imageVideo') {
-              // Only process if we have a file for this image
-              if (fileIndex < imageFiles.length) {
-                item.content.url = `/uploads/${imageFiles[fileIndex].filename}`;
-                fileIndex++;
+            if (item.type === 'imageVideo' && typeof item.content.imageIndex === 'number') {
+              const file = imageFiles[item.content.imageIndex];
+              if (file) {
+                return {
+                  ...item,
+                  content: {
+                    description: item.content.description || '',
+                    imagePath: file.filename,
+                    imageIndex: null
+                  }
+                };
               }
             }
             return item;
           });
+        } else if (req.files.imageVideo) {
+          console.log('[CONTROLLER] imageVideo files received but no headingsAndImages to assign.');
+          // Still store the filenames even if there are no headingsAndImages
+          blogData.content.imageVideos = req.files.imageVideo.map(file => file.filename);
+        } else {
+          console.log('[CONTROLLER] No imageVideo files received.');
         }
+      } else {
+        console.log('[CONTROLLER] No files received in request.');
       }
     } else {
       console.log('Processing as direct JSON');
@@ -157,20 +180,31 @@ exports.updateBlog = async (req, res) => {
       // Handle file uploads if present
       if (req.files) {
         if (req.files.mainImage) {
-          blogData.content.mainImage = `/uploads/${req.files.mainImage[0].filename}`;
+          blogData.content.mainImage = `${req.files.mainImage[0].filename}`;
         }
 
-        // Handle imageVideo files - exactly like mainImage
+        // Handle imageVideo files
         if (req.files.imageVideo && blogData.content.headingsAndImages) {
           const imageFiles = req.files.imageVideo;
-          let fileIndex = 0;
+          console.log('[CONTROLLER] imageVideo file(s) received:', imageFiles.map(f => f.originalname));
 
+          // Store all imageVideo filenames in the imageVideos array
+          blogData.content.imageVideos = imageFiles.map(file => file.filename);
+          console.log('[CONTROLLER] imageVideos array:', blogData.content.imageVideos);
+
+          // Update the headingsAndImages with file paths in the correct sequence
           blogData.content.headingsAndImages = blogData.content.headingsAndImages.map(item => {
-            if (item.type === 'imageVideo') {
-              // Only process if we have a file for this image
-              if (fileIndex < imageFiles.length) {
-                item.content.url = `/uploads/${imageFiles[fileIndex].filename}`;
-                fileIndex++;
+            if (item.type === 'imageVideo' && typeof item.content.imageIndex === 'number') {
+              const file = imageFiles[item.content.imageIndex];
+              if (file) {
+                return {
+                  ...item,
+                  content: {
+                    description: item.content.description || '',
+                    imagePath: file.filename,
+                    imageIndex: null
+                  }
+                };
               }
             }
             return item;
@@ -266,4 +300,4 @@ exports.updateBlogStatus = async (req, res) => {
       message: error.message
     });
   }
-}; 
+};

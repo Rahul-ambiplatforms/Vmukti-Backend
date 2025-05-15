@@ -10,6 +10,7 @@ const blogSchema = new mongoose.Schema({
     title: { type: String, required: true },
     imageText: { type: String },
     mainImage: { type: String }, // URL to stored image
+    imageVideos: [{ type: String }], // Array of URLs for image/video files
     brief: { type: mongoose.Schema.Types.Mixed, required: true }, // Slate editor content with formatting
     
     // Dynamic content array that can hold different types of content
@@ -18,7 +19,7 @@ const blogSchema = new mongoose.Schema({
       type: { 
         type: String, 
         required: true,
-        enum: ['h2', 'h3', 'p', 'imageVideo', 'cta']
+        enum: ['h2', 'h3','h4', 'p', 'imageVideo', 'cta']
       },
       // Using Mixed type to store different content structures
       content: { type: mongoose.Schema.Types.Mixed, required: true }
@@ -71,11 +72,14 @@ blogSchema.path('content.headingsAndImages').validate(function(items) {
     switch(item.type) {
       case 'h2':
       case 'h3':
+      case 'h4':
       case 'p':
         return item.content.text; // Must have text content
       
       case 'imageVideo':
-        return item.content.description && (item.content.file || item.content.url); // Must have description and file/url
+        // Check for either imageIndex (for new uploads) or imagePath (for existing images)
+        return item.content.description && 
+              (typeof item.content.imageIndex === 'number' || item.content.imagePath); 
       
       case 'cta':
         return item.content.ctaText && item.content.buttonText && item.content.buttonLink; // Must have all CTA fields
