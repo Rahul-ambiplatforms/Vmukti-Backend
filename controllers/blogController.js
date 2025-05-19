@@ -192,20 +192,32 @@ exports.updateBlog = async (req, res) => {
           blogData.content.imageVideos = imageFiles.map(file => file.filename);
           console.log('[CONTROLLER] imageVideos array:', blogData.content.imageVideos);
 
-          // Update the headingsAndImages with file paths in the correct sequence
+          // Update the headingsAndImages with file paths
           blogData.content.headingsAndImages = blogData.content.headingsAndImages.map(item => {
-            if (item.type === 'imageVideo' && typeof item.content.imageIndex === 'number') {
-              const file = imageFiles[item.content.imageIndex];
-              if (file) {
-                return {
-                  ...item,
-                  content: {
-                    description: item.content.description || '',
-                    imagePath: file.filename,
-                    imageIndex: null
-                  }
-                };
+            if (item.type === 'imageVideo') {
+              // For new uploads, use the imageIndex to get the correct file
+              if (typeof item.content.imageIndex === 'number') {
+                const file = imageFiles[item.content.imageIndex];
+                if (file) {
+                  return {
+                    ...item,
+                    content: {
+                      description: item.content.description || '',
+                      imagePath: file.filename,
+                      imageIndex: null
+                    }
+                  };
+                }
               }
+              // For existing images, keep the current imagePath
+              return {
+                ...item,
+                content: {
+                  description: item.content.description || '',
+                  imagePath: item.content.imagePath,
+                  imageIndex: null
+                }
+              };
             }
             return item;
           });
@@ -234,6 +246,7 @@ exports.updateBlog = async (req, res) => {
       data: blog
     });
   } catch (error) {
+    console.error('Blog update error:', error);
     res.status(400).json({
       status: 'error',
       message: error.message
