@@ -19,6 +19,8 @@ out/cache/
 .env.production.local
 .env.test.local
 
+/uploads/
+
 # Logs & temp files
 logs/
 *.log
