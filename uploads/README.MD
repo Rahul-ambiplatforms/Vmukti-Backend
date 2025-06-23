@@ -1,0 +1,1 @@
+this file has been created for the purpose of uploading an empty folder that will be used for uploading images on the server.
