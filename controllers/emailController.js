@@ -38,8 +38,8 @@ const sendEmailArcis = async (req, res) => {
   const { name, email, phone } = req.body;
 
   const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: process.env.RECEIVING_EMAIL,
+    from: process.env.EMAIL_ARCIS_USER,
+    to: process.env.RECEIVING_ARCIS_EMAIL,
     subject: `New Contact Form Submission from ${name}`,
     html: `
       <!DOCTYPE html>
@@ -112,8 +112,8 @@ const sendEmailArcis = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+        user: process.env.EMAIL_ARCIS_USER,
+        pass: process.env.EMAIL_ARCIS_PASSWORD,
       },
     });
 
