@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const blogSchema = new mongoose.Schema({
+  // Added blogAuthor to support the new author field from Admin UI
+  // Keeping existing author for backward compatibility
+  blogAuthor: { type: String }, // NEW: canonical author field
+  author: { type: String, required: true }, // existing field still required; controllers sync both
   metadata: {
     urlWords: { type: String, required: true },
     metaTitle: { type: String, required: true },

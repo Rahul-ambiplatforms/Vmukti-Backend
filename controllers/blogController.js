@@ -89,6 +89,16 @@ exports.createBlog = async (req, res) => {
             blogData = req.body;
         }
 
+        // Normalize author fields: ensure required top-level author is set
+        if (blogData) {
+            // Prefer explicit blogAuthor, then content.author, finally existing author
+            const resolvedAuthor = blogData.blogAuthor || blogData?.content?.author || blogData.author;
+            if (resolvedAuthor) {
+                blogData.blogAuthor = resolvedAuthor; // NEW: store canonical author field
+                blogData.author = resolvedAuthor; // REQUIRED: satisfy schema's required author
+            }
+        }
+
         // Log the final data before validation
         console.log('Final blog data:', blogData);
         console.log('Has metadata:', !!blogData?.metadata);
@@ -131,6 +141,7 @@ exports.getBlogs = async (req, res) => {
     // Get search and sort parameters from query
     const searchTerm = req.query.search || "";
     const sortOrder = req.query.sort || "latest"; // 'latest' or 'oldest'
+    const status = req.query.status; // optional: 'draft' | 'published' | 'archived'
 
     console.log("Search Term:", searchTerm);
     console.log("Sort Order:", sortOrder);
@@ -140,6 +151,9 @@ exports.getBlogs = async (req, res) => {
     const matchStage = {};
     if (searchTerm) {
       matchStage["content.title"] = { $regex: searchTerm, $options: "i" };
+    }
+    if (status && ["draft", "published", "archived"].includes(status)) {
+      matchStage["status"] = status;
     }
     
     // 2. AddFields Stage: Create a new field latestDate to sort on.
@@ -263,6 +277,15 @@ exports.updateBlog = async (req, res) => {
         } else {
             // Direct JSON submission
             blogData = req.body;
+        }
+
+        // Normalize author fields: ensure required top-level author is set
+        if (blogData) {
+            const resolvedAuthor = blogData.blogAuthor || blogData?.content?.author || blogData.author;
+            if (resolvedAuthor) {
+                blogData.blogAuthor = resolvedAuthor; // NEW: store canonical author field
+                blogData.author = resolvedAuthor; // REQUIRED: satisfy schema's required author
+            }
         }
 
         const blog = await Blog.findByIdAndUpdate(
