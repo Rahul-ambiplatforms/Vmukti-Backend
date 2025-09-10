@@ -1,78 +1,94 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const blogSchema = new mongoose.Schema({
-  // Added blogAuthor to support the new author field from Admin UI
-  // Keeping existing author for backward compatibility
-  blogAuthor: { type: String }, // NEW: canonical author field
-  author: { type: String, required: true }, // existing field still required; controllers sync both
-  metadata: {
-    urlWords: { type: String, required: true },
-    metaTitle: { type: String, required: true },
-    metaDescription: { type: String, required: true }
-  },
-  content: {
-    title: { type: String, required: true },
-    imageText: { type: String },
-    mainImage: { type: String }, // URL to stored image
-    imageVideos: [{ type: String }], // Array of URLs for image/video files
-    brief: { type: mongoose.Schema.Types.Mixed, required: true }, // Slate editor content with formatting
-
-    // Dynamic content array that can hold different types of content
-    headingsAndImages: [{
-      id: { type: String, required: true },
-      type: {
-        type: String,
-        required: true,
-        enum: ['h2', 'h3', 'h4', 'p', 'imageVideo', 'cta']
-      },
-      content: { type: mongoose.Schema.Types.Mixed, required: true }
-    }],
-
-    // FAQ section with structured question-answer pairs
-    faqs: {
-      title: String,
-      items: [{
-        id: { type: String, required: true },
-        question: { type: String, required: true },
-        answer: { type: mongoose.Schema.Types.Mixed, required: true } // Slate editor content
-      }]
+const blogSchema = new mongoose.Schema(
+  {
+    // Added blogAuthor to support the new author field from Admin UI
+    // Keeping existing author for backward compatibility
+    // author: { type: String, required: true }, // existing field still required; controllers sync both
+    metadata: {
+      urlWords: { type: String, required: true },
+      metaTitle: { type: String, required: true },
+      metaDescription: { type: String, required: true },
     },
+    content: {
+      title: { type: String, required: true },
+      blogAuthor: { type: String, required: true }, 
+      imageText: { type: String },
+      mainImage: { type: String }, 
+      imageVideos: [{ type: String }], // Array of URLs for image/video files
+      brief: { type: mongoose.Schema.Types.Mixed, required: true }, // Slate editor content with formatting
 
-    // Store raw JSON schema as is
-    schemas: [{
-      id: { type: String, required: true },
-      content: { type: mongoose.Schema.Types.Mixed, required: true }
-    }]
+      // Dynamic content array that can hold different types of content
+      headingsAndImages: [
+        {
+          id: { type: String, required: true },
+          type: {
+            type: String,
+            required: true,
+            enum: ["h2", "h3", "h4", "p", "imageVideo", "cta"],
+          },
+          content: { type: mongoose.Schema.Types.Mixed, required: true },
+        },
+      ],
+
+      // FAQ section with structured question-answer pairs
+      faqs: {
+        title: String,
+        items: [
+          {
+            id: { type: String, required: true },
+            question: { type: String, required: true },
+            answer: { type: mongoose.Schema.Types.Mixed, required: true }, // Slate editor content
+          },
+        ],
+      },
+
+      // Store raw JSON schema as is
+      schemas: [
+        {
+          id: { type: String, required: true },
+          content: { type: mongoose.Schema.Types.Mixed, required: true },
+        },
+      ],
+    },
+    status: {
+      type: String,
+      enum: ["draft", "published", "archived"],
+      default: "draft",
+    },
   },
-  status: {
-    type: String,
-    enum: ['draft', 'published', 'archived'],
-    default: 'draft'
+  {
+    timestamps: true,
   }
-}, {
-  timestamps: true
-});
+);
 
 // Validate content.headingsAndImages
-blogSchema.path('content.headingsAndImages').validate(function (items) {
+blogSchema.path("content.headingsAndImages").validate(function (items) {
   if (!Array.isArray(items)) return false;
 
-  return items.every(item => {
+  return items.every((item) => {
     switch (item.type) {
-      case 'h2':
-      case 'h3':
-      case 'h4':
-      case 'p':
+      case "h2":
+      case "h3":
+      case "h4":
+      case "p":
         return item.content.text;
-      case 'imageVideo':
-        return item.content.description &&
-          (typeof item.content.imageIndex === 'number' || item.content.imagePath);
-      case 'cta':
-        return item.content.ctaText && item.content.buttonText && item.content.buttonLink;
+      case "imageVideo":
+        return (
+          item.content.description &&
+          (typeof item.content.imageIndex === "number" ||
+            item.content.imagePath)
+        );
+      case "cta":
+        return (
+          item.content.ctaText &&
+          item.content.buttonText &&
+          item.content.buttonLink
+        );
       default:
         return false;
     }
   });
-}, 'Invalid content in headingsAndImages array');
+}, "Invalid content in headingsAndImages array");
 
-module.exports = mongoose.model('Blog', blogSchema);
+module.exports = mongoose.model("Blog", blogSchema);

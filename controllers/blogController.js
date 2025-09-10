@@ -95,7 +95,7 @@ exports.createBlog = async (req, res) => {
             const resolvedAuthor = blogData.blogAuthor || blogData?.content?.author || blogData.author;
             if (resolvedAuthor) {
                 blogData.blogAuthor = resolvedAuthor; // NEW: store canonical author field
-                blogData.author = resolvedAuthor; // REQUIRED: satisfy schema's required author
+                // blogData.author = resolvedAuthor; // REQUIRED: satisfy schema's required author
             }
         }
 
@@ -284,7 +284,7 @@ exports.updateBlog = async (req, res) => {
             const resolvedAuthor = blogData.blogAuthor || blogData?.content?.author || blogData.author;
             if (resolvedAuthor) {
                 blogData.blogAuthor = resolvedAuthor; // NEW: store canonical author field
-                blogData.author = resolvedAuthor; // REQUIRED: satisfy schema's required author
+                // blogData.author = resolvedAuthor; // REQUIRED: satisfy schema's required author
             }
         }
 
