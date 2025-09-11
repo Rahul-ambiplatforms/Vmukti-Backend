@@ -3,11 +3,10 @@ const router = express.Router();
 const blogController = require('../controllers/blogController');
 const upload = require('../utils/fileUpload');
 
-// Configure multer for multiple file uploads
 console.log('[ROUTES] blogRoutes.js: Initializing upload.fields for mainImage and imageVideo');
 const uploadFields = upload.fields([
   { name: 'mainImage', maxCount: 1 },
-  { name: 'imageVideo', maxCount: 10 } // Allow multiple image/video uploads for content
+  { name: 'imageVideo', maxCount: 10 }
 ]);
 
 // Blog routes

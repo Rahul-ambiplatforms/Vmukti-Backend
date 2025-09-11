@@ -4,7 +4,6 @@ const Blog = require("../models/Blog");
 
 // Create a new blog
 exports.createBlog = async (req, res) => {
-  // Your existing createBlog code here
   try {
     console.log("Request content type:", req.get("Content-Type"));
     console.log("Request body:", req.body);
@@ -68,7 +67,6 @@ exports.createBlog = async (req, res) => {
             blogData.content.imageVideos
           );
 
-          // Update the headingsAndImages with file paths in the correct sequence
           blogData.content.headingsAndImages =
             blogData.content.headingsAndImages.map((item) => {
               if (
@@ -109,9 +107,9 @@ exports.createBlog = async (req, res) => {
     }
 
     if (blogData) {
+      console.log("Resolved Author:", blogData.content);
       const resolvedAuthor = blogData?.content?.blogAuthor;
       if (resolvedAuthor) {
-        // blogData.blogAuthor = resolvedAuthor; // NEW: store canonical author field
         blogData.content.blogAuthor = resolvedAuthor;
       }
     }

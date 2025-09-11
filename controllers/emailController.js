@@ -97,7 +97,6 @@ const sendEmailArcis = async (req, res) => {
   try {
     const EMS_API_URL = "https://etaems.arcisai.io:5000/api/createLead";
 
-    // Prepare the data payload, mapping form fields to what the API expects
     const leadData = {
       name: name,
       mobile: phone,
@@ -105,21 +104,12 @@ const sendEmailArcis = async (req, res) => {
       company: company,
       location: location,
       industryType: camerasFor,
-      // customerType: "Other",
       leadType: leadType,
       customerQuantity: customerQuantity,
-      // Create a default requirement object since the form doesn't capture this detail
-      // requirement: [
-      //   {
-      //     cameraType: `Cameras for ${camerasFor}`,
-      //     quantity: 1,
-      //     orderTimeline: "To be discussed",
-      //   },
-      // ],
     };
 
     try {
-      // console.log("Attempting to create lead in EMS:", leadData);
+      console.log("Attempting to create lead in EMS:", leadData);
       await axios.post(EMS_API_URL, leadData);
       // console.log("Lead created successfully in EMS:", emsResponse.data);
     } catch (apiError) {

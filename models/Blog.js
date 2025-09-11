@@ -2,9 +2,6 @@ const mongoose = require("mongoose");
 
 const blogSchema = new mongoose.Schema(
   {
-    // Added blogAuthor to support the new author field from Admin UI
-    // Keeping existing author for backward compatibility
-    // author: { type: String, required: true }, // existing field still required; controllers sync both
     metadata: {
       urlWords: { type: String, required: true },
       metaTitle: { type: String, required: true },
@@ -15,8 +12,8 @@ const blogSchema = new mongoose.Schema(
       blogAuthor: { type: String, required: true }, 
       imageText: { type: String },
       mainImage: { type: String }, 
-      imageVideos: [{ type: String }], // Array of URLs for image/video files
-      brief: { type: mongoose.Schema.Types.Mixed, required: true }, // Slate editor content with formatting
+      imageVideos: [{ type: String }], 
+      brief: { type: mongoose.Schema.Types.Mixed, required: true }, 
 
       // Dynamic content array that can hold different types of content
       headingsAndImages: [
