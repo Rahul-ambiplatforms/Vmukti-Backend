@@ -230,7 +230,7 @@ const sendEmailArcis = async (req, res) => {
       },
     });
 
-    await transporter.sendMail(mailOptions);
+    // await transporter.sendMail(mailOptions);
 
     // Send the final success response to the frontend
     res
