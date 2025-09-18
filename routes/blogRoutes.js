@@ -28,6 +28,8 @@ router.get('/:id', (req, res, next) => {
   next();
 }, blogController.getBlog);
 
+router.get("/urlWords/:words", blogController.getBlogByUrlWords);
+
 router.put('/:id', (req, res, next) => {
   console.log('[ROUTES] PUT /blogs/:id - Incoming request for ID:', req.params.id);
   next();

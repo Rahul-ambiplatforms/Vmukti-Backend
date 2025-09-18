@@ -247,6 +247,30 @@ exports.getBlog = async (req, res) => {
   }
 };
 
+exports.getBlogByUrlWords = async (req, res) => {
+  // Your existing getBlog code here
+  console.log("req.params.words",req.params.words)
+  try {
+    const blog = await Blog.findOne({ "metadata.urlWords": req.params.words });
+    if (!blog) {
+      return res.status(404).json({
+        status: "error",
+        message: "Blog not found",
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: blog,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};
+
 exports.updateBlog = async (req, res) => {
   // Your existing updateBlog code here
   try {
