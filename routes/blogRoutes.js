@@ -23,6 +23,11 @@ router.get('/', (req, res, next) => {
   next();
 }, blogController.getBlogs);
 
+router.get('/getFiles', (req, res, next) => {
+  console.log('[ROUTES] GET /blogs - Incoming request');
+  next();
+}, blogController.getImages);
+
 router.get('/:id', (req, res, next) => {
   console.log('[ROUTES] GET /blogs/:id - Incoming request for ID:', req.params.id);
   next();

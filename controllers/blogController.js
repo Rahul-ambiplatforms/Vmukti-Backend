@@ -2,6 +2,28 @@
 
 const Blog = require("../models/Blog");
 
+
+const fs = require("fs");
+const path = require("path");
+
+exports.getImages = (req, res) => {
+  
+  const uploadsDir = path.join(__dirname, "../uploads");
+
+  fs.readdir(uploadsDir, (err, files) => {
+    if (err) {
+      console.error("Error reading uploads directory:", err);
+      return res.status(500).json({ error: "Failed to read uploads folder" });
+    }
+
+    // Filter only image files if needed
+    const imageFiles = files.filter(file =>
+      /\.(jpg|jpeg|png|gif|webp)$/i.test(file)
+    );
+
+    res.json({ files: imageFiles });
+  });
+};
 // Create a new blog
 exports.createBlog = async (req, res) => {
   try {
