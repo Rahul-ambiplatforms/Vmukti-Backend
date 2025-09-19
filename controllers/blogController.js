@@ -2,12 +2,10 @@
 
 const Blog = require("../models/Blog");
 
-
 const fs = require("fs");
 const path = require("path");
 
 exports.getImages = (req, res) => {
-  
   const uploadsDir = path.join(__dirname, "../uploads");
 
   fs.readdir(uploadsDir, (err, files) => {
@@ -17,7 +15,7 @@ exports.getImages = (req, res) => {
     }
 
     // Filter only image files if needed
-    const imageFiles = files.filter(file =>
+    const imageFiles = files.filter((file) =>
       /\.(jpg|jpeg|png|gif|webp)$/i.test(file)
     );
 
@@ -271,7 +269,7 @@ exports.getBlog = async (req, res) => {
 
 exports.getBlogByUrlWords = async (req, res) => {
   // Your existing getBlog code here
-  console.log("req.params.words",req.params.words)
+  console.log("req.params.words", req.params.words);
   try {
     const blog = await Blog.findOne({ "metadata.urlWords": req.params.words });
     if (!blog) {
