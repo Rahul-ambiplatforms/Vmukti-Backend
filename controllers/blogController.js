@@ -26,8 +26,7 @@ exports.getImages = (req, res) => {
 exports.createBlog = async (req, res) => {
   try {
     console.log("Request content type:", req.get("Content-Type"));
-    console.log("Request body:", req.body);
-    console.log("Request files:", req.files);
+    // console.log("Request body:", req.body);
 
     let blogData;
 
