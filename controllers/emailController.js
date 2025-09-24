@@ -95,8 +95,9 @@ const sendEmailArcis = async (req, res) => {
   } = req.body;
 
   try {
-    const EMS_API_URL = "https://etaems.arcisai.io:5000/api/createLead";
-
+    const EMS_API_URL =
+      // "https://c-r-m-icr7b.ondigitalocean.app/backend/api/crmSales/createLead";
+      "https://c-r-m-icr7b.ondigitalocean.app/backend/api/crmSales/createLead";
     const leadData = {
       name: name,
       mobile: phone,
@@ -105,13 +106,14 @@ const sendEmailArcis = async (req, res) => {
       location: location,
       industryType: camerasFor,
       leadType: leadType,
+      requirement:[],
       customerQuantity: customerQuantity,
     };
 
     try {
       console.log("Attempting to create lead in EMS:", leadData);
       await axios.post(EMS_API_URL, leadData);
-      // console.log("Lead created successfully in EMS:", emsResponse.data);
+      console.log("Lead created successfully in EMS:", emsResponse.data);
     } catch (apiError) {
       console.error(
         "CRITICAL: Failed to create lead in EMS API. The email will still be sent as a backup."
