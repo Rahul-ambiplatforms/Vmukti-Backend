@@ -89,9 +89,12 @@ const sendEmailArcis = async (req, res) => {
     phone,
     company,
     location,
+    customerType,
     camerasFor,
     customerQuantity,
+    message,
     leadType,
+    updates,
   } = req.body;
 
   try {
@@ -105,6 +108,7 @@ const sendEmailArcis = async (req, res) => {
       company: company,
       location: location,
       industryType: camerasFor,
+      customerType: customerType,
       leadType: leadType,
       requirement:[],
       customerQuantity: customerQuantity,
