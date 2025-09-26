@@ -173,7 +173,7 @@ exports.getBlogs = async (req, res) => {
 
     // Get search and sort parameters from query
     const searchTerm = req.query.search || "";
-    const sortOrder = req.query.sort || "latest"; // 'latest' or 'oldest'
+    const sortOrder = req.query.sort || "latest"; 
     const status = req.query.status; // optional: 'draft' | 'published' | 'archived'
 
     console.log("Search Term:", searchTerm);

@@ -36,11 +36,9 @@ exports.initiateLogin = async (req, res) => {
   try {
     let { email, password } = req.body;
 
-    // Normalize inputs
     email = typeof email === "string" ? email.trim().toLowerCase() : "";
     password = typeof password === "string" ? password : "";
 
-    // 1. Check if user exists and password is correct
     // console.log("This is the body", req.body);
     const user = await User.findOne({ email });
     // console.log("all user", user);

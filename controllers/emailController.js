@@ -22,8 +22,8 @@ const sendEmail = async (req, res) => {
   console.log("Received form data:", req.body);
   // const name = fullName.trim() || fullname.trim();
   let name = "";
-  if (fullname) name = fullname.trim();
-  else name = `${firstName.trim()} ${lastName.trim()}`;
+  if (fullname) name = fullname;
+  else name = `${firstName} ${lastName}`;
   // const name = fullname.trim() || `${firstName.trim()} ${lastName.trim()}`;
 
   const subjectSource = formType === "Blog" ? "Blog" : "Contact";
@@ -110,14 +110,14 @@ const sendEmailArcis = async (req, res) => {
       industryType: camerasFor,
       customerType: customerType,
       leadType: leadType,
-      requirement:[],
+      requirement: [],
       customerQuantity: customerQuantity,
     };
 
     try {
       console.log("Attempting to create lead in EMS:", leadData);
-      await axios.post(EMS_API_URL, leadData);
-      console.log("Lead created successfully in EMS:", emsResponse.data);
+      const response = await axios.post(EMS_API_URL, leadData);
+      console.log("Lead created successfully in EMS:", response);
     } catch (apiError) {
       console.error(
         "CRITICAL: Failed to create lead in EMS API. The email will still be sent as a backup."
@@ -131,6 +131,7 @@ const sendEmailArcis = async (req, res) => {
     }
 
     const logoUrl = "https://arcisai.io/images/ArcisAi.png";
+    // const logoUrl = "../public/assets/ArcisAI.png"
     const mailOptions = {
       from: process.env.EMAIL_ARCIS_USER,
       to: process.env.RECEIVING_ARCIS_EMAIL,
@@ -236,7 +237,7 @@ const sendEmailArcis = async (req, res) => {
       },
     });
 
-    // await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
 
     // Send the final success response to the frontend
     res
