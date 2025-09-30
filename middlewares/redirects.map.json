@@ -1,0 +1,6 @@
+{
+	"/industries/educationindustry": "/industry/education",
+	"/serving/enterprise": "/industry/enterprise",
+	"/solutions?slider=ems": "/solution/enterprise-management-system",
+	"/solutions?slider=vms": "/solution/video-management-system"
+}

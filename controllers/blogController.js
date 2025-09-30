@@ -268,7 +268,7 @@ exports.getBlog = async (req, res) => {
 
 exports.getBlogByUrlWords = async (req, res) => {
   // Your existing getBlog code here
-  console.log("req.params.words", req.params.words);
+  // console.log("req.params.words", req.params.words);
   try {
     const blog = await Blog.findOne({ "metadata.urlWords": req.params.words });
     if (!blog) {

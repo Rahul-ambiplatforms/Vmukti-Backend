@@ -20,9 +20,9 @@ const sendEmail = async (req, res) => {
   if (fullName) name = fullName;
 
   const subjectSource = formType === "Blog" ? "Blog" : "Contact";
-  console.log("Received form data:", req.body);
+  // console.log("Received form data:", req.body);
 
-  console.log("EMAIL SEND TO", process.env.RECEIVING_EMAIL);
+  // console.log("EMAIL SEND TO", process.env.RECEIVING_EMAIL);
 
   const mailOptions = {
     from: process.env.EMAIL_USER,

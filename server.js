@@ -1,10 +1,11 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-const path = require('path');
-const fs = require('fs');
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+const path = require("path");
+const fs = require("fs");
+const redirectLinks = require("./middlewares/redirects");
 
 const app = express();
 
@@ -12,40 +13,45 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static('uploads'));
+app.use("/uploads", express.static("uploads"));
+
+// Redirect middleware for handling old URLs
+app.use(redirectLinks);
 
 // Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Create uploads directory if it doesn't exist
-if (!fs.existsSync('./uploads')) {
-  fs.mkdirSync('./uploads');
+if (!fs.existsSync("./uploads")) {
+  fs.mkdirSync("./uploads");
 }
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('DB connected successfully'))
-.catch(err => console.error('DB connection error:', err));
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("DB connected successfully"))
+  .catch((err) => console.error("DB connection error:", err));
+
 
 // Routes
-const emailRoutes = require('./routes/emailRoutes');
-const authRoutes = require('./routes/authRoutes');
-const blogRoutes = require('./routes/blogRoutes');
-const fileRoutes = require('./routes/fileRoutes');
-app.use('/api', emailRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/blogs', blogRoutes)
-app.use('/api/files', fileRoutes);
+const emailRoutes = require("./routes/emailRoutes");
+const authRoutes = require("./routes/authRoutes");
+const blogRoutes = require("./routes/blogRoutes");
+const fileRoutes = require("./routes/fileRoutes");
+app.use("/api", emailRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/blogs", blogRoutes);
+app.use("/api/files", fileRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
-    status: 'error',
-    message: 'Something went wrong!'
+    status: "error",
+    message: "Something went wrong!",
   });
 });
 
