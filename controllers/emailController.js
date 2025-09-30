@@ -2,67 +2,143 @@ const nodemailer = require("nodemailer");
 const axios = require("axios");
 
 const sendEmail = async (req, res) => {
-  // const {
-  //   fullname,
-  //   fullName, // For the General Contact form
-  //   email,
-  //   phone,
-  //   message,
-  //   formType, // 'Contact' or 'Blog'
-  //   country,
-  //   city,
-  //   businessProfile,
-  //   companyName,
-  //   inquiryType,
-  // } = req.body;
+  const {
+    fullName,
+    email,
+    phone,
+    message,
+    formType,
+    country,
+    city,
+    businessProfile,
+    companyName,
+    inquiryType,
+  } = req.body;
 
-  const { firstName, lastName, fullname, email, phone, message, formType } =
-    req.body;
-
-  console.log("Received form data:", req.body);
-  // const name = fullName.trim() || fullname.trim();
+  // console.log("Received form data initial:", req.body);
   let name = "";
-  if (fullname) name = fullname;
-  else name = `${firstName} ${lastName}`;
-  // const name = fullname.trim() || `${firstName.trim()} ${lastName.trim()}`;
+  if (fullName) name = fullName;
 
   const subjectSource = formType === "Blog" ? "Blog" : "Contact";
   console.log("Received form data:", req.body);
+
+  console.log("EMAIL SEND TO", process.env.RECEIVING_EMAIL);
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: process.env.RECEIVING_EMAIL,
     subject: `New ${subjectSource} Form Submission from ${name}`,
     html: `
-      <h3>New ${subjectSource} Form Submission</h3>
-      <p><strong>Name:</strong> ${name}</p>
-      <p><strong>Email:</strong> ${email || "Not provided"}</p>
-      <p><strong>Phone:</strong> ${
-        phone && typeof phone === "object"
-          ? `${phone.code} ${phone.number}`
-          : phone || "Not provided"
-      }</p>
-      <p><strong>Message:</strong></p>
-      <p>${message || "Not provided"}</p>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; }
+      </style>
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f4f4f4;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td style="padding: 20px 0;">
+            <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; background-color: #ffffff; border: 1px solid #dddddd; border-radius: 8px;">
+              
+              <!-- Header with Logo -->
+              <tr>
+                <td align="center" style="padding: 20px 0 20px 0;">
+                  <img src="https://vmukti.com/assets/VMukti_logo.png" alt="VMukti Logo" width="150" style="display: block;" />
+                </td>
+              </tr>
+              
+              <!-- Title -->
+              <tr>
+                <td style="padding: 0 30px;">
+                  <h1 style="font-size: 24px; margin: 0; color: #333333; text-align: center;">New ${subjectSource} Lead</h1>
+                  <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eeeeee;">
+                </td>
+              </tr>
+              
+              <!-- Submission Details -->
+              <tr>
+                <td style="padding: 10px 30px 30px 30px;">
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 16px; line-height: 1.6; color: #555555;">
+                    <tr>
+                      <td style="padding: 8px 0; font-weight: bold; width: 150px;">Name:</td>
+                      <td style="padding: 8px 0;">${name}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; font-weight: bold;">Email:</td>
+                      <td style="padding: 8px 0;">${
+                        email || "Not provided"
+                      }</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; font-weight: bold;">Phone:</td>
+                      <td style="padding: 8px 0;">${
+                        phone && typeof phone === "object"
+                          ? `${phone.code} ${phone.number}`
+                          : phone || "Not provided"
+                      }</td>
+                    </tr>
+                    ${
+                      companyName
+                        ? `<tr><td style="padding: 8px 0; font-weight: bold;">Company:</td><td style="padding: 8px 0;">${companyName}</td></tr>`
+                        : ""
+                    }
+                    ${
+                      country
+                        ? `<tr><td style="padding: 8px 0; font-weight: bold;">Country:</td><td style="padding: 8px 0;">${country}</td></tr>`
+                        : ""
+                    }
+                    ${
+                      city
+                        ? `<tr><td style="padding: 8px 0; font-weight: bold;">City:</td><td style="padding: 8px 0;">${city}</td></tr>`
+                        : ""
+                    }
+                    ${
+                      businessProfile
+                        ? `<tr><td style="padding: 8px 0; font-weight: bold;">Business Profile:</td><td style="padding: 8px 0;">${businessProfile}</td></tr>`
+                        : ""
+                    }
+                    ${
+                      inquiryType
+                        ? `<tr><td style="padding: 8px 0; font-weight: bold;">Inquiry Type:</td><td style="padding: 8px 0;">${inquiryType}</td></tr>`
+                        : ""
+                    }
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Message Section -->
+              ${
+                message
+                  ? `
+              <tr>
+                <td style="padding: 0 30px 30px 30px;">
+                   <hr style="margin: 0 0 20px 0; border: 0; border-top: 1px solid #eeeeee;">
+                  <p style="font-size: 16px; margin: 0 0 10px 0; color: #333333; font-weight: bold;">Message:</p>
+                  <p style="font-size: 16px; line-height: 1.6; color: #555555; margin: 0; white-space: pre-wrap;">${message}</p>
+                </td>
+              </tr>
+              `
+                  : ""
+              }
+              
+              <!-- Footer -->
+              <tr>
+                <td style="padding: 20px 30px; background-color: #f8f8f8; border-top: 1px solid #dddddd; text-align: center; font-size: 12px; color: #999999; border-radius: 0 0 8px 8px;">
+                  This is an automated notification. Please do not reply directly to this email.
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
     `,
   };
-  // ${
-  //         companyName
-  //           ? `<p><strong>Company Name:</strong> ${companyName}</p>`
-  //           : ""
-  //       }
-  //       ${country ? `<p><strong>Country:</strong> ${country}</p>` : ""}
-  //       ${city ? `<p><strong>City:</strong> ${city}</p>` : ""}
-  //       ${
-  //         businessProfile
-  //           ? `<p><strong>Business Profile:</strong> ${businessProfile}</p>`
-  //           : ""
-  //       }
-  //       ${
-  //         inquiryType
-  //           ? `<p><strong>Inquiry Type:</strong> ${inquiryType}</p>`
-  //           : ""
-  //       }
 
   try {
     const transporter = nodemailer.createTransport({
