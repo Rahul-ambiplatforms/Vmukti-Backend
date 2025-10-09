@@ -1,5 +1,7 @@
 const nodemailer = require("nodemailer");
 const axios = require("axios");
+const path = require("path");
+const fs = require("fs");
 
 const sendEmail = async (req, res) => {
   const {
@@ -329,7 +331,142 @@ const sendEmailArcis = async (req, res) => {
   }
 };
 
+// New: Send Career Application Email with optional resume attachment
+const sendCareerEmail = async (req, res) => {
+  try {
+    const {
+      fullName,
+      email,
+      phone,
+      yearsOfExperience,
+      currentCompany,
+      about,
+      jobTitle,
+    } = req.body || {};
+
+    const resumeFile = req.file;
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: process.env.RECEIVING_EMAIL_HR,
+      subject: `New Career Application${
+        jobTitle ? `: ${jobTitle}` : ""
+      } - ${fullName}`,
+      html: `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </head>
+      <body style="margin:0;padding:0;background:#f5f7fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
+        <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+          <tr>
+            <td align="center" style="padding:24px;">
+              <table width="640" style="background:#ffffff;border:1px solid #e7eaf3;border-radius:10px;overflow:hidden" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding:20px 24px 0">
+                    <img src="https://vmukti.com/assets/VMukti_logo.png" alt="VMukti" width="140" />
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding:8px 24px 16px">
+                    <h2 style="margin:0;color:#2a2f45;font-size:22px;">New Career Application</h2>
+                    ${
+                      jobTitle
+                        ? `<p style=\"margin:6px 0 0;color:#6b7280;\">Role: <strong>${jobTitle}</strong></p>`
+                        : ""
+                    }
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:0 24px 4px">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+                      <tbody>
+                        <tr>
+                          <td style="padding:10px 12px;background:#f9fafb;border-bottom:1px solid #eef2f7;width:220px;font-weight:600;color:#374151">Full Name</td>
+                          <td style="padding:10px 12px;border-bottom:1px solid #eef2f7;color:#111827">${
+                            fullName || "N/A"
+                          }</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:10px 12px;background:#f9fafb;border-bottom:1px solid #eef2f7;width:220px;font-weight:600;color:#374151">Email</td>
+                          <td style="padding:10px 12px;border-bottom:1px solid #eef2f7;color:#111827">${
+                            email || "N/A"
+                          }</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:10px 12px;background:#f9fafb;border-bottom:1px solid #eef2f7;width:220px;font-weight:600;color:#374151">Phone</td>
+                          <td style="padding:10px 12px;border-bottom:1px solid #eef2f7;color:#111827">${
+                            phone || "N/A"
+                          }</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:10px 12px;background:#f9fafb;border-bottom:1px solid #eef2f7;width:220px;font-weight:600;color:#374151">Years of Experience</td>
+                          <td style="padding:10px 12px;border-bottom:1px solid #eef2f7;color:#111827">${
+                            yearsOfExperience || "N/A"
+                          }</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:10px 12px;background:#f9fafb;border-bottom:1px solid #eef2f7;width:220px;font-weight:600;color:#374151">Current Company</td>
+                          <td style="padding:10px 12px;border-bottom:1px solid #eef2f7;color:#111827">${
+                            currentCompany || "N/A"
+                          }</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:10px 12px;background:#f9fafb;width:220px;font-weight:600;color:#374151;vertical-align:top">About</td>
+                          <td style="padding:10px 12px;color:#111827;white-space:pre-wrap">${
+                            about || "N/A"
+                          }</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
+      `,
+      attachments: resumeFile
+        ? [
+            {
+              filename: resumeFile.originalname,
+              content: resumeFile.buffer,
+              contentType: resumeFile.mimetype,
+            },
+          ]
+        : [],
+    };
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    await transporter.sendMail(mailOptions);
+    // Safety: if any file was written to disk by another middleware, remove it
+    if (resumeFile && resumeFile.path) {
+      try {
+        fs.unlinkSync(resumeFile.path);
+      } catch (e) {
+        // ignore cleanup error
+      }
+    }
+    res.status(200).json({ message: "Career email sent successfully" });
+  } catch (error) {
+    console.error("Error sending career email:", error);
+    res.status(500).json({ error: error.message || "Failed to send email" });
+  }
+};
+
 module.exports = {
   sendEmail,
   sendEmailArcis,
+  sendCareerEmail,
 };
