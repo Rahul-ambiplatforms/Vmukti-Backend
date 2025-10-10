@@ -29,3 +29,19 @@ exports.protect = async (req, res, next) => {
     res.status(401).json({ error: 'Not authorized to access this route' });
   }
 };
+
+exports.authorizeRoles = (...allowedRoles) => {
+  return (req, res, next) => {
+    try {
+      if (!req.user || !req.user.role) {
+        return res.status(403).json({ error: 'Forbidden: role missing' });
+      }
+      if (!allowedRoles.includes(req.user.role)) {
+        return res.status(403).json({ error: 'Forbidden: insufficient permissions' });
+      }
+      next();
+    } catch (err) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+  };
+};

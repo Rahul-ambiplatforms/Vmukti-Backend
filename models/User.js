@@ -13,6 +13,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  role: {
+    type: String,
+    enum: ["HR", "MARKETING", "ADMIN"],
+    // No default; when absent, user gets no privileged access
+  },
   otp: {
     code: String,
     expiresAt: Date,

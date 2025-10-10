@@ -6,7 +6,7 @@ const { sendOTPEmail } = require("../utils/emailService");
 // Register a new user
 exports.register = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -15,7 +15,7 @@ exports.register = async (req, res) => {
     }
 
     // Create new user
-    const newUser = await User.create({ email, password });
+    const newUser = await User.create({ email, password, role });
 
     res.status(201).json({
       status: "success",
@@ -135,7 +135,7 @@ exports.verifyOTP = async (req, res) => {
 
     // 6. Generate JWT
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
     );
@@ -148,6 +148,7 @@ exports.verifyOTP = async (req, res) => {
         user: {
           email: user.email,
           isVerified: user.isVerified,
+          role: user.role,
         },
       },
     });

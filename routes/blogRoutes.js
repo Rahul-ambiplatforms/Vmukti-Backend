@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const blogController = require('../controllers/blogController');
 const upload = require('../utils/fileUpload');
+const { protect, authorizeRoles } = require('../middlewares/authMiddleware');
 
 console.log('[ROUTES] blogRoutes.js: Initializing upload.fields for mainImage and imageVideo');
 const uploadFields = upload.fields([
@@ -10,7 +11,7 @@ const uploadFields = upload.fields([
 ]);
 
 // Blog routes
-router.post('/', (req, res, next) => {
+router.post('/', protect, authorizeRoles('MARKETING', 'ADMIN'), (req, res, next) => {
   console.log('[ROUTES] POST /blogs - Incoming request');
   next();
 }, uploadFields, (req, res, next) => {
@@ -35,7 +36,7 @@ router.get('/:id', (req, res, next) => {
 
 router.get("/urlWords/:words", blogController.getBlogByUrlWords);
 
-router.put('/:id', (req, res, next) => {
+router.put('/:id', protect, authorizeRoles('MARKETING', 'ADMIN'), (req, res, next) => {
   console.log('[ROUTES] PUT /blogs/:id - Incoming request for ID:', req.params.id);
   next();
 }, uploadFields, (req, res, next) => {
@@ -43,12 +44,12 @@ router.put('/:id', (req, res, next) => {
   next();
 }, blogController.updateBlog);
 
-router.delete('/:id', (req, res, next) => {
+router.delete('/:id', protect, authorizeRoles('MARKETING', 'ADMIN'), (req, res, next) => {
   console.log('[ROUTES] DELETE /blogs/:id - Incoming request for ID:', req.params.id);
   next();
 }, blogController.deleteBlog);
 
-router.patch('/:id/status', (req, res, next) => {
+router.patch('/:id/status', protect, authorizeRoles('MARKETING', 'ADMIN'), (req, res, next) => {
   console.log('[ROUTES] PATCH /blogs/:id/status - Incoming request for ID:', req.params.id, 'Body:', req.body);
   next();
 }, blogController.updateBlogStatus);

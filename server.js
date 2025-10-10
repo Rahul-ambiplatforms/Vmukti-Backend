@@ -37,14 +37,21 @@ mongoose
 
 
 // Routes
+app.get('/', (req, res) => {
+  res.send('<h1>Welcome to VMukti Web Backend!</h1>');
+});
+
+
 const emailRoutes = require("./routes/emailRoutes");
 const authRoutes = require("./routes/authRoutes");
 const blogRoutes = require("./routes/blogRoutes");
 const fileRoutes = require("./routes/fileRoutes");
+const jobRoutes = require("./routes/jobRoutes");
 app.use("/api", emailRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/files", fileRoutes);
+app.use("/api/jobs", jobRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
