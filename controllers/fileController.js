@@ -82,6 +82,35 @@ const storage = new CloudinaryStorage({
 
 const parser = multer({ storage: storage }).single("file");
 
+// JD PDF upload storage with constraints
+const jdStorage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
+    const baseName = path.parse(file.originalname || "").name;
+    return {
+      folder: "JD_vmukti",
+      resource_type: "raw", 
+      allowed_formats: ["pdf"],
+      format: "pdf",
+      access_mode: "public", 
+      public_id: baseName,
+      use_filename: true, 
+      unique_filename: false,
+    };
+  },
+});
+
+const jdMulter = multer({
+  storage: jdStorage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype !== "application/pdf") {
+      return cb(new Error("Only PDF files are allowed"));
+    }
+    cb(null, true);
+  },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+}).single("jd");
+
 exports.uploadFile = (req, res) => {
   // console.log("This is the file controller", res);
   parser(req, res, (err) => {
@@ -116,15 +145,71 @@ exports.uploadFile = (req, res) => {
   });
 };
 
+// Inspect a JD asset on Cloudinary (checks format, bytes, resource_type)
+exports.getJDInfo = async (req, res) => {
+  try {
+    const filename = String(req.params.filename || "")
+      .split("/")
+      .pop();
+    if (!filename) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Filename is required" });
+    }
+    const publicId = `JD_vmukti/${filename}`;
+    const info = await cloudinary.api.resource(publicId, {
+      resource_type: "raw",
+    });
+    return res.status(200).json({
+      status: "success",
+      data: {
+        publicId: info.public_id,
+        resourceType: info.resource_type,
+        bytes: info.bytes,
+        format: info.format, // should be 'pdf'
+        createdAt: info.created_at,
+        secureUrl: info.secure_url,
+      },
+    });
+  } catch (err) {
+    console.error("[getJDInfo] Error:", err);
+    return res
+      .status(400)
+      .json({
+        status: "error",
+        message: err?.message || "Failed to fetch JD info",
+      });
+  }
+};
+
+// Delete a JD from Cloudinary by base filename
+exports.deleteJD = async (req, res) => {
+  try {
+    const filename = String(req.params.filename || '').split('/').pop();
+    if (!filename) {
+      return res.status(400).json({ status: 'error', message: 'Filename is required' });
+    }
+    const publicId = `JD_vmukti/${filename}`;
+    // Attempt delete as raw (PDFs)
+    const result = await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
+    if (result.result !== 'ok' && result.result !== 'not_found') {
+      return res.status(400).json({ status: 'error', message: 'Failed to delete JD from Cloudinary', cloudinary: result });
+    }
+    return res.status(200).json({ status: 'success', message: 'JD deleted successfully' });
+  } catch (err) {
+    console.error('[deleteJD] Error:', err);
+    return res.status(500).json({ status: 'error', message: err?.message || 'Failed to delete JD' });
+  }
+};
 
 exports.deleteFile = async (req, res) => {
   try {
     const filenameWithExt = req.params.filename;
-    
+
     const baseFilename = path.parse(filenameWithExt).name;
-    
+
     const publicId = `uploads/${baseFilename}`;
-    
+
     console.log(`Received request to delete: ${filenameWithExt}`);
     console.log(`Reconstructed Public ID for Cloudinary: ${publicId}`);
 
@@ -135,8 +220,9 @@ exports.deleteFile = async (req, res) => {
     if (result.result !== "ok") {
       return res.status(404).json({
         status: "error",
-        message: "File not found on Cloudinary. The public ID may be incorrect.",
-        sentPublicId: publicId, 
+        message:
+          "File not found on Cloudinary. The public ID may be incorrect.",
+        sentPublicId: publicId,
       });
     }
 
@@ -148,4 +234,57 @@ exports.deleteFile = async (req, res) => {
     console.error("Error during file deletion:", error);
     res.status(500).json({ status: "error", message: error.message });
   }
+};
+
+// Upload JD (PDF only, <=5MB) to Cloudinary folder JD_vmukti
+exports.uploadJD = (req, res) => {
+  jdMulter(req, res, (err) => {
+    console.log("[uploadJD] Incoming JD upload request");
+    if (err) {
+      console.error("[uploadJD] Error:", {
+        name: err?.name,
+        code: err?.code,
+        message: err?.message,
+      });
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return res
+          .status(400)
+          .json({
+            status: "error",
+            message: "File too large. Max 5MB allowed.",
+          });
+      }
+      if (
+        typeof err.message === "string" &&
+        err.message.toLowerCase().includes("pdf")
+      ) {
+        return res
+          .status(400)
+          .json({ status: "error", message: "Only PDF files are allowed." });
+      }
+      return res
+        .status(400)
+        .json({ status: "error", message: err.message || "Upload failed" });
+    }
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "No file uploaded" });
+    }
+    // Cloudinary returns path/url and filename
+    const baseLogName = path.parse(req.file.filename).name;
+    console.log("[uploadJD] Upload successful:", {
+      filename: baseLogName,
+      mimetype: req.file.mimetype,
+    });
+    // Ensure we only return the base public_id name (no folder, no extension)
+    const baseFilename = path.parse(req.file.filename).name;
+    return res.status(200).json({
+      status: "success",
+      data: {
+        filename: baseFilename,
+        mimetype: req.file.mimetype,
+      },
+    });
+  });
 };

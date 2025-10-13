@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { protect, authorizeRoles } = require('../middlewares/authMiddleware');
 const jobController = require('../controllers/jobController');
+// No file uploads required for jobs now
 
 // Public: list and get jobs (optional)
 router.get('/', jobController.getJobs);
