@@ -10,7 +10,7 @@ const uploadResume = require("../utils/resumeUpload");
 router.post("/send-email", sendEmail);
 router.post("/send-email-arcis", sendEmailArcis);
 router.post(
-  "/send-email-carrer",
+  "/send-email-career",
   uploadResume.single("resume"),
   sendCareerEmail
 );
