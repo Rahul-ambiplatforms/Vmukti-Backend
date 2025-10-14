@@ -111,6 +111,8 @@ const jdMulter = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 }).single("jd");
 
+
+// ----Images to Cloudinary---- 
 exports.uploadFile = (req, res) => {
   // console.log("This is the file controller", res);
   parser(req, res, (err) => {
@@ -145,6 +147,41 @@ exports.uploadFile = (req, res) => {
   });
 };
 
+exports.deleteFile = async (req, res) => {
+  try {
+    const filenameWithExt = req.params.filename;
+
+    const baseFilename = path.parse(filenameWithExt).name;
+
+    const publicId = `uploads/${baseFilename}`;
+
+    console.log(`Received request to delete: ${filenameWithExt}`);
+    console.log(`Reconstructed Public ID for Cloudinary: ${publicId}`);
+
+    const result = await cloudinary.uploader.destroy(publicId);
+
+    console.log("Response from Cloudinary:", result);
+
+    if (result.result !== "ok") {
+      return res.status(404).json({
+        status: "error",
+        message:
+          "File not found on Cloudinary. The public ID may be incorrect.",
+        sentPublicId: publicId,
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "File deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error during file deletion:", error);
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+// ----JD(PDF) to Cloudinary----
 // Inspect a JD asset on Cloudinary (checks format, bytes, resource_type)
 exports.getJDInfo = async (req, res) => {
   try {
@@ -197,59 +234,21 @@ exports.deleteJD = async (req, res) => {
       resource_type: "raw",
     });
     if (result.result !== "ok" && result.result !== "not_found") {
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          message: "Failed to delete JD from Cloudinary",
-          cloudinary: result,
-        });
+      return res.status(400).json({
+        status: "error",
+        message: "Failed to delete JD from Cloudinary",
+        cloudinary: result,
+      });
     }
     return res
       .status(200)
       .json({ status: "success", message: "JD deleted successfully" });
   } catch (err) {
     console.error("[deleteJD] Error:", err);
-    return res
-      .status(500)
-      .json({
-        status: "error",
-        message: err?.message || "Failed to delete JD",
-      });
-  }
-};
-
-exports.deleteFile = async (req, res) => {
-  try {
-    const filenameWithExt = req.params.filename;
-
-    const baseFilename = path.parse(filenameWithExt).name;
-
-    const publicId = `uploads/${baseFilename}`;
-
-    console.log(`Received request to delete: ${filenameWithExt}`);
-    console.log(`Reconstructed Public ID for Cloudinary: ${publicId}`);
-
-    const result = await cloudinary.uploader.destroy(publicId);
-
-    console.log("Response from Cloudinary:", result);
-
-    if (result.result !== "ok") {
-      return res.status(404).json({
-        status: "error",
-        message:
-          "File not found on Cloudinary. The public ID may be incorrect.",
-        sentPublicId: publicId,
-      });
-    }
-
-    res.status(200).json({
-      status: "success",
-      message: "File deleted successfully",
+    return res.status(500).json({
+      status: "error",
+      message: err?.message || "Failed to delete JD",
     });
-  } catch (error) {
-    console.error("Error during file deletion:", error);
-    res.status(500).json({ status: "error", message: error.message });
   }
 };
 

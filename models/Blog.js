@@ -9,11 +9,11 @@ const blogSchema = new mongoose.Schema(
     },
     content: {
       title: { type: String, required: true },
-      blogAuthor: { type: String, required: true }, 
+      blogAuthor: { type: String, required: true },
       imageText: { type: String },
-      mainImage: { type: String }, 
-      imageVideos: [{ type: String }], 
-      brief: { type: mongoose.Schema.Types.Mixed, required: true }, 
+      mainImage: { type: String },
+      imageVideos: [{ type: String }],
+      brief: { type: mongoose.Schema.Types.Mixed, required: true },
 
       // Dynamic content array that can hold different types of content
       headingsAndImages: [
