@@ -76,7 +76,7 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: "uploads",
-    allowed_formats: ["jpg", "jpeg", "png", "gif", "mp4"],
+    allowed_formats: ["jpg", "jpeg", "png", "gif", "svg", "webm", "mp4", "mov"],
   },
 });
 
@@ -89,12 +89,12 @@ const jdStorage = new CloudinaryStorage({
     const baseName = path.parse(file.originalname || "").name;
     return {
       folder: "JD_vmukti",
-      resource_type: "raw", 
+      resource_type: "raw",
       allowed_formats: ["pdf"],
       format: "pdf",
-      access_mode: "public", 
+      access_mode: "public",
       public_id: baseName,
-      use_filename: true, 
+      use_filename: true,
       unique_filename: false,
     };
   },
@@ -173,32 +173,49 @@ exports.getJDInfo = async (req, res) => {
     });
   } catch (err) {
     console.error("[getJDInfo] Error:", err);
-    return res
-      .status(400)
-      .json({
-        status: "error",
-        message: err?.message || "Failed to fetch JD info",
-      });
+    return res.status(400).json({
+      status: "error",
+      message: err?.message || "Failed to fetch JD info",
+    });
   }
 };
 
 // Delete a JD from Cloudinary by base filename
 exports.deleteJD = async (req, res) => {
   try {
-    const filename = String(req.params.filename || '').split('/').pop();
+    const filename = String(req.params.filename || "")
+      .split("/")
+      .pop();
     if (!filename) {
-      return res.status(400).json({ status: 'error', message: 'Filename is required' });
+      return res
+        .status(400)
+        .json({ status: "error", message: "Filename is required" });
     }
     const publicId = `JD_vmukti/${filename}`;
     // Attempt delete as raw (PDFs)
-    const result = await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
-    if (result.result !== 'ok' && result.result !== 'not_found') {
-      return res.status(400).json({ status: 'error', message: 'Failed to delete JD from Cloudinary', cloudinary: result });
+    const result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: "raw",
+    });
+    if (result.result !== "ok" && result.result !== "not_found") {
+      return res
+        .status(400)
+        .json({
+          status: "error",
+          message: "Failed to delete JD from Cloudinary",
+          cloudinary: result,
+        });
     }
-    return res.status(200).json({ status: 'success', message: 'JD deleted successfully' });
+    return res
+      .status(200)
+      .json({ status: "success", message: "JD deleted successfully" });
   } catch (err) {
-    console.error('[deleteJD] Error:', err);
-    return res.status(500).json({ status: 'error', message: err?.message || 'Failed to delete JD' });
+    console.error("[deleteJD] Error:", err);
+    return res
+      .status(500)
+      .json({
+        status: "error",
+        message: err?.message || "Failed to delete JD",
+      });
   }
 };
 
@@ -247,12 +264,10 @@ exports.uploadJD = (req, res) => {
         message: err?.message,
       });
       if (err.code === "LIMIT_FILE_SIZE") {
-        return res
-          .status(400)
-          .json({
-            status: "error",
-            message: "File too large. Max 5MB allowed.",
-          });
+        return res.status(400).json({
+          status: "error",
+          message: "File too large. Max 5MB allowed.",
+        });
       }
       if (
         typeof err.message === "string" &&
