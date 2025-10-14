@@ -15,6 +15,21 @@ app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
 
+// WWW redirection middleware (non-www to www)
+app.use((req, res, next) => {
+  const host = req.headers.host;
+  
+  // Check if the request is not from www subdomain and not localhost/development
+  if (host && !host.startsWith('www.') && !host.includes('localhost') && !host.includes('127.0.0.1')) {
+    const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+    const wwwUrl = `${protocol}://www.${host}${req.originalUrl}`;
+    console.log(`Redirecting non-www to www: ${req.url} -> ${wwwUrl}`);
+    return res.redirect(301, wwwUrl);
+  }
+  
+  next();
+});
+
 // Redirect middleware for handling old URLs
 app.use(redirectLinks);
 
