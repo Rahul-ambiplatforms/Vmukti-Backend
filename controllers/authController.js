@@ -247,7 +247,6 @@ exports.resetPassword = async (req, res) => {
     const storedOtp = user.otp;
     const isLegacyStringOtp = typeof storedOtp === "string";
 
-    // Helpful debug
     const now = new Date();
     const expiresAt = !isLegacyStringOtp && storedOtp ? new Date(storedOtp.expiresAt) : null;
     console.log("ResetPwd: hasOtp", !!storedOtp, "legacy", isLegacyStringOtp, "expiresAt", expiresAt, "now", now);
@@ -274,7 +273,6 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({ error: "Invalid OTP" });
     }
 
-    // 6. Update password and clear OTP
     user.password = newPassword;
     user.otp = undefined; // clear OTP after successful reset
     if (typeof user.markModified === "function") user.markModified("otp");

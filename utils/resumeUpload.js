@@ -1,6 +1,5 @@
 const multer = require('multer');
 
-// Use memory storage so files are NOT persisted to disk
 const storage = multer.memoryStorage();
 
 // Accept only common resume document types

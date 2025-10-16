@@ -47,3 +47,4 @@ userSchema.methods.correctPassword = async function (
 };
 
 module.exports = mongoose.model("User", userSchema);
+// Arcis_User

@@ -89,3 +89,4 @@ blogSchema.path("content.headingsAndImages").validate(function (items) {
 }, "Invalid content in headingsAndImages array");
 
 module.exports = mongoose.model("Blog", blogSchema);
+// Arcis_
