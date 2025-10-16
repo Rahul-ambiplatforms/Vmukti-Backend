@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 const fs = require("fs");
 const redirectLinks = require("./middlewares/redirects");
+const tenant = require("./middlewares/tenant");
 
 const app = express();
 
@@ -14,6 +15,8 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
+// Resolve tenant for each request (before routes)
+app.use(tenant);
 
 // Redirect middleware for handling old URLs
 app.use(redirectLinks);

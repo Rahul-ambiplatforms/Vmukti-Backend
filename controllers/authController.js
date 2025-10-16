@@ -1,4 +1,4 @@
-const User = require("../models/User");
+const { userModel } = require("../models/factory");
 const jwt = require("jsonwebtoken");
 const { generateOTP, getOTPExpirationTime } = require("../utils/otpGenerator");
 const { sendOTPEmail } = require("../utils/emailService");
@@ -9,6 +9,7 @@ exports.register = async (req, res) => {
     const { email, password, role } = req.body;
 
     // Check if user already exists
+    const User = userModel(req.tenant);
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: "Email already in use" });
@@ -40,6 +41,7 @@ exports.initiateLogin = async (req, res) => {
     password = typeof password === "string" ? password : "";
 
     // console.log("This is the body", req.body);
+    const User = userModel(req.tenant);
     const user = await User.findOne({ email });
     // console.log("all user", user);
 
@@ -91,6 +93,7 @@ exports.verifyOTP = async (req, res) => {
     const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
     // 1. Find user
+    const User = userModel(req.tenant);
     const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -160,6 +163,7 @@ exports.verifyOTP = async (req, res) => {
 // Protected route example
 exports.getMe = async (req, res) => {
   try {
+    const User = userModel(req.tenant);
     const user = await User.findById(req.user.id);
     res.status(200).json({
       status: "success",
@@ -181,6 +185,7 @@ exports.forgotPassword = async (req, res) => {
 
     // 1. Check if user exists
     console.log("EMail for the search for FORGOT", normalizedEmail)
+    const User = userModel(req.tenant);
     const user = await User.findOne({ email: normalizedEmail });
     console.log("Forget PWD USER FINDING....", user)
     if (!user) {
@@ -228,6 +233,7 @@ exports.resetPassword = async (req, res) => {
 
     // 1. Find user: prefer email, else find by otp.code
     let user = null;
+    const User = userModel(req.tenant);
     if (email) {
       user = await User.findOne({ email });
     } else if (otp) {

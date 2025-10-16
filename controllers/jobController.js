@@ -1,8 +1,9 @@
-const Job = require('../models/Job');
+const { jobModel } = require('../models/factory');
 const path = require('path');
 
 exports.createJob = async (req, res) => {
   try {
+    const Job = jobModel(req.tenant);
     const { jobRole, employmentType, location, experience, openings } = req.body;
 
     if (!jobRole || !employmentType || !location || !experience || !openings) {
@@ -40,6 +41,7 @@ exports.createJob = async (req, res) => {
 
 exports.getJobs = async (req, res) => {
   try {
+    const Job = jobModel(req.tenant);
     const { page = 1, limit = 10, status } = req.query;
     const query = {};
     if (status) query.status = status;
@@ -56,6 +58,7 @@ exports.getJobs = async (req, res) => {
 
 exports.getJob = async (req, res) => {
   try {
+    const Job = jobModel(req.tenant);
     const job = await Job.findById(req.params.id);
     if (!job) return res.status(404).json({ error: 'Job not found' });
     res.status(200).json({ status: 'success', data: { job } });
@@ -80,6 +83,7 @@ exports.updateJob = async (req, res) => {
       update.skillsAndResponsibilities = update.skillsAndResponsibilities.trim();
     }
 
+    const Job = jobModel(req.tenant);
     const job = await Job.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });
     if (!job) return res.status(404).json({ error: 'Job not found' });
     res.status(200).json({ status: 'success', data: { job } });
@@ -90,6 +94,7 @@ exports.updateJob = async (req, res) => {
 
 exports.deleteJob = async (req, res) => {
   try {
+    const Job = jobModel(req.tenant);
     const job = await Job.findByIdAndDelete(req.params.id);
     if (!job) return res.status(404).json({ error: 'Job not found' });
     res.status(200).json({ status: 'success', message: 'Job deleted' });
@@ -100,6 +105,7 @@ exports.deleteJob = async (req, res) => {
 
 exports.closeJob = async (req, res) => {
   try {
+    const Job = jobModel(req.tenant);
     const job = await Job.findByIdAndUpdate(
       req.params.id,
       { status: 'CLOSED' },
@@ -114,6 +120,7 @@ exports.closeJob = async (req, res) => {
 
 exports.updateJobStatus = async (req, res) => {
   try {
+    const Job = jobModel(req.tenant);
     const { status } = req.body;
     if (!['OPEN', 'CLOSED'].includes(status)) {
       return res.status(400).json({ error: 'Invalid status. Must be OPEN or CLOSED' });
@@ -140,6 +147,7 @@ exports.updateJobOrder = async (req, res) => {
     }
 
     // Update each job's order
+    const Job = jobModel(req.tenant);
     const updatePromises = jobOrders.map(({ jobId, order }) =>
       Job.findByIdAndUpdate(jobId, { order }, { new: true })
     );
