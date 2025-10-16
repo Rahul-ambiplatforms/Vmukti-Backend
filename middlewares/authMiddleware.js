@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const { userModel } = require('../models/factory');
 
 exports.protect = async (req, res, next) => {
   try {
@@ -14,6 +14,7 @@ exports.protect = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    const User = userModel(req.tenant);
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
       return res.status(401).json({ error: 'User no longer exists' });

@@ -40,7 +40,7 @@ mongoose
 
 // Routes
 app.get("/", (req, res) => {
-  res.send("<h1>Welcome to VMukti Web Backend!</h1>");
+  res.send("<h1>Welcome to VMukti and Arcis Web Backend!</h1>");
 });
 
 const emailRoutes = require("./routes/emailRoutes");
