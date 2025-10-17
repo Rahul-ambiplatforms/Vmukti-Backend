@@ -60,21 +60,27 @@ exports.deleteFile = async (req, res) => {
 
     const baseFilename = path.parse(filenameWithExt).name;
 
-    const publicId = `uploads/${baseFilename}`;
+    const folder = req.tenant === 'arcis' ? 'upload_arcis' : 'uploads';
+    const publicId = `${folder}/${baseFilename}`;
 
     console.log(`Received request to delete: ${filenameWithExt}`);
     console.log(`Reconstructed Public ID for Cloudinary: ${publicId}`);
 
-    const result = await cloudinary.uploader.destroy(publicId);
+    // Try deleting as an image first; if not found, try as a video (since we accept both)
+    let result = await cloudinary.uploader.destroy(publicId, { resource_type: 'image' });
+    if (result.result !== 'ok') {
+      result = await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
+    }
 
     console.log("Response from Cloudinary:", result);
 
-    if (result.result !== "ok") {
+    if (result.result !== "ok" && result.result !== "not_found") {
       return res.status(404).json({
         status: "error",
         message:
-          "File not found on Cloudinary. The public ID may be incorrect.",
+          "File not deleted on Cloudinary. The public ID may be incorrect.",
         sentPublicId: publicId,
+        cloudinary: result,
       });
     }
 
@@ -87,6 +93,8 @@ exports.deleteFile = async (req, res) => {
     res.status(500).json({ status: "error", message: error.message });
   }
 };
+
+// -----------------------JOB DESCRIPTION (JD) UPLOADS TO CLOUDINARY-----------------------
 
 // JD PDF upload storage with constraints
 const jdStorage = new CloudinaryStorage({
