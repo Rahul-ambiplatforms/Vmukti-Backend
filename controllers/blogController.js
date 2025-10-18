@@ -360,10 +360,67 @@ exports.updateBlog = async (req, res) => {
       }
     }
 
-    const blog = await Blog.findByIdAndUpdate(req.params.id, blogData, {
+    // Handle preserveUpdatedAt logic
+    let updateOptions = {
       new: true,
       runValidators: true,
-    });
+    };
+
+    // Handle preserveUpdatedAt logic
+    if (blogData.options && blogData.options.preserveUpdatedAt) {
+      console.log('=== Backend Minor Update Logic Debug ===');
+      console.log('preserveUpdatedAt:', blogData.options.preserveUpdatedAt);
+      console.log('customUpdatedAt from frontend:', blogData.options.customUpdatedAt);
+      
+      // Get the current blog to preserve its updatedAt
+      const currentBlog = await Blog.findById(req.params.id);
+      if (currentBlog) {
+        console.log('Current blog updatedAt in DB:', currentBlog.updatedAt);
+        
+        // Remove the options from blogData as it's not part of the schema
+        delete blogData.options;
+        
+        // For minor updates, we need to disable automatic timestamp updates
+        // and manually preserve the updatedAt field
+        const preserveUpdateOptions = {
+          ...updateOptions,
+          timestamps: false // Disable automatic timestamp updates
+        };
+        
+        const blog = await Blog.findByIdAndUpdate(
+          req.params.id, 
+          { 
+            ...blogData,
+            updatedAt: currentBlog.updatedAt // Explicitly preserve the current updatedAt
+          }, 
+          preserveUpdateOptions
+        );
+        
+        if (!blog) {
+          return res.status(404).json({
+            status: "error",
+            message: "Blog not found",
+          });
+        }
+
+        console.log('Updated blog returned with preserved updatedAt:', blog.updatedAt);
+        console.log('Expected preserved date:', currentBlog.updatedAt);
+        console.log('Dates match:', blog.updatedAt.getTime() === currentBlog.updatedAt.getTime());
+        console.log('=== End Backend Debug ===');
+        
+        return res.status(200).json({
+          status: "success",
+          data: blog,
+        });
+      }
+    }
+
+    // Remove options from blogData as it's not part of the schema
+    if (blogData.options) {
+      delete blogData.options;
+    }
+
+    const blog = await Blog.findByIdAndUpdate(req.params.id, blogData, updateOptions);
 
     if (!blog) {
       return res.status(404).json({
