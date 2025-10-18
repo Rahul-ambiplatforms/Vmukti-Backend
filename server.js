@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 const fs = require("fs");
 const redirectLinks = require("./middlewares/redirects");
+const tenant = require("./middlewares/tenant");
 
 const app = express();
 
@@ -14,6 +15,9 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
+app.use("/upload_arcis", express.static("upload_arcis"));
+// Resolve tenant for each request (before routes)
+app.use(tenant);
 
 // Redirect middleware for handling old URLs
 app.use(redirectLinks);
@@ -24,6 +28,9 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Create uploads directory if it doesn't exist
 if (!fs.existsSync("./uploads")) {
   fs.mkdirSync("./uploads");
+}
+if (!fs.existsSync("./upload_arcis")) {
+  fs.mkdirSync("./upload_arcis");
 }
 
 // Database connection
@@ -37,7 +44,7 @@ mongoose
 
 // Routes
 app.get("/", (req, res) => {
-  res.send("<h1>Welcome to VMukti Web Backend!</h1>");
+  res.send("<h1>Welcome to VMukti and Arcis Web Backend!</h1>");
 });
 
 const emailRoutes = require("./routes/emailRoutes");

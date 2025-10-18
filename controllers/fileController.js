@@ -11,45 +11,15 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: {
-    folder: "uploads",
+  params: (req, file) => ({
+    folder: req.tenant === 'arcis' ? 'upload_arcis' : 'uploads',
     allowed_formats: ["jpg", "jpeg", "png", "gif", "svg", "webm", "mp4", "mov"],
-  },
+  }),
 });
 
 const parser = multer({ storage: storage }).single("file");
 
-// JD PDF upload storage with constraints
-const jdStorage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => {
-    const baseName = path.parse(file.originalname || "").name;
-    return {
-      folder: "JD_vmukti",
-      resource_type: "raw",
-      allowed_formats: ["pdf"],
-      format: "pdf",
-      access_mode: "public",
-      public_id: baseName,
-      use_filename: true,
-      unique_filename: false,
-    };
-  },
-});
-
-const jdMulter = multer({
-  storage: jdStorage,
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype !== "application/pdf") {
-      return cb(new Error("Only PDF files are allowed"));
-    }
-    cb(null, true);
-  },
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-}).single("jd");
-
-
-// ----Images to Cloudinary---- 
+// ----Images to Cloudinary----
 exports.uploadFile = (req, res) => {
   // console.log("This is the file controller", res);
   parser(req, res, (err) => {
@@ -90,21 +60,27 @@ exports.deleteFile = async (req, res) => {
 
     const baseFilename = path.parse(filenameWithExt).name;
 
-    const publicId = `uploads/${baseFilename}`;
+    const folder = req.tenant === 'arcis' ? 'upload_arcis' : 'uploads';
+    const publicId = `${folder}/${baseFilename}`;
 
     console.log(`Received request to delete: ${filenameWithExt}`);
     console.log(`Reconstructed Public ID for Cloudinary: ${publicId}`);
 
-    const result = await cloudinary.uploader.destroy(publicId);
+    // Try deleting as an image first; if not found, try as a video (since we accept both)
+    let result = await cloudinary.uploader.destroy(publicId, { resource_type: 'image' });
+    if (result.result !== 'ok') {
+      result = await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
+    }
 
     console.log("Response from Cloudinary:", result);
 
-    if (result.result !== "ok") {
+    if (result.result !== "ok" && result.result !== "not_found") {
       return res.status(404).json({
         status: "error",
         message:
-          "File not found on Cloudinary. The public ID may be incorrect.",
+          "File not deleted on Cloudinary. The public ID may be incorrect.",
         sentPublicId: publicId,
+        cloudinary: result,
       });
     }
 
@@ -118,6 +94,37 @@ exports.deleteFile = async (req, res) => {
   }
 };
 
+// -----------------------JOB DESCRIPTION (JD) UPLOADS TO CLOUDINARY-----------------------
+
+// JD PDF upload storage with constraints
+const jdStorage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
+    const baseName = path.parse(file.originalname || "").name;
+    return {
+      folder: req.tenant === 'arcis' ? 'JD_arcis' : 'JD_vmukti',
+      resource_type: "raw",
+      allowed_formats: ["pdf"],
+      format: "pdf",
+      access_mode: "public",
+      public_id: baseName,
+      use_filename: true,
+      unique_filename: false,
+    };
+  },
+});
+
+const jdMulter = multer({
+  storage: jdStorage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype !== "application/pdf") {
+      return cb(new Error("Only PDF files are allowed"));
+    }
+    cb(null, true);
+  },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+}).single("jd");
+
 // ----JD(PDF) to Cloudinary----
 // Inspect a JD asset on Cloudinary (checks format, bytes, resource_type)
 exports.getJDInfo = async (req, res) => {
@@ -130,7 +137,8 @@ exports.getJDInfo = async (req, res) => {
         .status(400)
         .json({ status: "error", message: "Filename is required" });
     }
-    const publicId = `JD_vmukti/${filename}`;
+    const folder = req.tenant === 'arcis' ? 'JD_arcis' : 'JD_vmukti';
+    const publicId = `${folder}/${filename}`;
     const info = await cloudinary.api.resource(publicId, {
       resource_type: "raw",
     });
@@ -165,7 +173,8 @@ exports.deleteJD = async (req, res) => {
         .status(400)
         .json({ status: "error", message: "Filename is required" });
     }
-    const publicId = `JD_vmukti/${filename}`;
+    const folder = req.tenant === 'arcis' ? 'JD_arcis' : 'JD_vmukti';
+    const publicId = `${folder}/${filename}`;
     // Attempt delete as raw (PDFs)
     const result = await cloudinary.uploader.destroy(publicId, {
       resource_type: "raw",

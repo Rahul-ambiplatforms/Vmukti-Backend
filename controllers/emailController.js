@@ -177,7 +177,6 @@ const sendEmailArcis = async (req, res) => {
 
   try {
     const EMS_API_URL =
-      // "https://c-r-m-icr7b.ondigitalocean.app/backend/api/crmSales/createLead";
       "https://c-r-m-icr7b.ondigitalocean.app/backend/api/crmSales/createLead";
     const leadData = {
       name: name,
@@ -209,7 +208,6 @@ const sendEmailArcis = async (req, res) => {
     }
 
     const logoUrl = "https://arcisai.io/images/ArcisAi.png";
-    // const logoUrl = "../public/assets/ArcisAI.png"
     const mailOptions = {
       from: process.env.EMAIL_ARCIS_USER,
       to: process.env.RECEIVING_ARCIS_EMAIL,

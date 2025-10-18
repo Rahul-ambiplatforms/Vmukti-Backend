@@ -5,7 +5,8 @@ const path = require('path');
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     console.log('[MULTER] Destination called for field:', file.fieldname, 'Original name:', file.originalname);
-    cb(null, 'uploads/');
+    const dest = req.tenant === 'arcis' ? 'upload_arcis/' : 'uploads/';
+    cb(null, dest);
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);

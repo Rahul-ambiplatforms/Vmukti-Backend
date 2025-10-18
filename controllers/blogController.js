@@ -1,6 +1,6 @@
 // backend/controllers/blogController.js
 
-const Blog = require("../models/Blog");
+const { blogModel } = require("../models/factory");
 
 const fs = require("fs");
 const path = require("path");
@@ -25,6 +25,7 @@ exports.getImages = (req, res) => {
 // Create a new blog
 exports.createBlog = async (req, res) => {
   try {
+    const Blog = blogModel(req.tenant);
     console.log("Request content type:", req.get("Content-Type"));
     // console.log("Request body:", req.body);
 
@@ -212,6 +213,7 @@ exports.getBlogs = async (req, res) => {
       { $match: matchStage },
       { $count: "total" },
     ];
+    const Blog = blogModel(req.tenant);
     const totalResult = await Blog.aggregate(totalPipeline);
     const total = totalResult.length > 0 ? totalResult[0].total : 0;
 
@@ -246,6 +248,7 @@ exports.getBlogs = async (req, res) => {
 exports.getBlog = async (req, res) => {
   // Your existing getBlog code here
   try {
+    const Blog = blogModel(req.tenant);
     const blog = await Blog.findById(req.params.id);
     if (!blog) {
       return res.status(404).json({
@@ -270,6 +273,7 @@ exports.getBlogByUrlWords = async (req, res) => {
   // Your existing getBlog code here
   // console.log("req.params.words", req.params.words);
   try {
+    const Blog = blogModel(req.tenant);
     const blog = await Blog.findOne({ "metadata.urlWords": req.params.words });
     if (!blog) {
       return res.status(404).json({
@@ -360,6 +364,7 @@ exports.updateBlog = async (req, res) => {
       }
     }
 
+    const Blog = blogModel(req.tenant);
     // Handle preserveUpdatedAt logic
     let updateOptions = {
       new: true,
@@ -444,6 +449,7 @@ exports.updateBlog = async (req, res) => {
 exports.deleteBlog = async (req, res) => {
   // Your existing deleteBlog code here
   try {
+    const Blog = blogModel(req.tenant);
     const blog = await Blog.findByIdAndDelete(req.params.id);
 
     if (!blog) {
@@ -477,6 +483,7 @@ exports.updateBlogStatus = async (req, res) => {
       });
     }
 
+    const Blog = blogModel(req.tenant);
     const blog = await Blog.findByIdAndUpdate(
       req.params.id,
       {
