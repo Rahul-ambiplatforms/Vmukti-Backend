@@ -6,6 +6,7 @@ const {
   sendEmail,
   sendEmailArcis,
   sendCareerEmail,
+  sendCareerEmailAdiance,
 } = require("../controllers/emailController");
 
 router.post("/send-email", sendEmail);
@@ -14,6 +15,12 @@ router.post(
   "/send-email-career",
   uploadResume.single("resume"),
   sendCareerEmail
+);
+
+router.post(
+  "/send-email-career-adiance",
+  uploadResume.single("resume"),
+  sendCareerEmailAdiance
 );
 
 module.exports = router;
