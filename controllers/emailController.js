@@ -168,6 +168,7 @@ const sendEmailArcis = async (req, res) => {
     email,
     phone,
     company,
+    formType,
     location,
     customerType,
     camerasFor,
@@ -195,23 +196,25 @@ const sendEmailArcis = async (req, res) => {
       requirement: [],
       customerQuantity: customerQuantity,
     };
+    if (formType === "Contact") {
+      try {
+        console.log("Attempting to create lead in EMS:", leadData);
 
-    try {
-      console.log("Attempting to create lead in EMS:", leadData);
-      const response = await axios.post(EMS_API_URL, leadData);
-      console.log("Lead created successfully in EMS:", response);
-    } catch (apiError) {
-      console.error(
-        "CRITICAL: Failed to create lead in EMS API. The email will still be sent as a backup."
-      );
-      if (apiError.response) {
-        console.error("API Error Data:", apiError.response.data);
-        console.error("API Error Status:", apiError.response.status);
-      } else {
-        console.error("API Error Message:", apiError.message);
+        const response = await axios.post(EMS_API_URL, leadData);
+
+        console.log("Lead created successfully in EMS:", response);
+      } catch (apiError) {
+        console.error(
+          "CRITICAL: Failed to create lead in EMS API. The email will still be sent as a backup."
+        );
+        if (apiError.response) {
+          console.error("API Error Data:", apiError.response.data);
+          console.error("API Error Status:", apiError.response.status);
+        } else {
+          console.error("API Error Message:", apiError.message);
+        }
       }
     }
-
     const logoUrl = "https://arcisai.io/images/ArcisAi.png";
     const mailOptions = {
       from: process.env.EMAIL_ARCIS_USER,
