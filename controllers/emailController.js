@@ -2,6 +2,7 @@ const nodemailer = require("nodemailer");
 const axios = require("axios");
 const path = require("path");
 const fs = require("fs");
+const e = require("cors");
 
 //---Contact/Blog form email---VMUKTI
 const sendEmail = async (req, res) => {
@@ -11,6 +12,7 @@ const sendEmail = async (req, res) => {
     phone,
     message,
     formType,
+    pageUrl,
     country,
     city,
     businessProfile,
@@ -22,7 +24,13 @@ const sendEmail = async (req, res) => {
   let name = "";
   if (fullName) name = fullName;
 
-  const subjectSource = formType === "Blog" ? "Blog" : "Contact";
+  const subjectSource =
+    formType === "Blog"
+      ? "Blog"
+      : formType === "Contact"
+      ? "Contact"
+      : "Newsletter";
+
   // console.log("Received form data:", req.body);
 
   // console.log("EMAIL SEND TO", process.env.RECEIVING_EMAIL);
@@ -30,7 +38,7 @@ const sendEmail = async (req, res) => {
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: process.env.RECEIVING_EMAIL,
-    subject: `New ${subjectSource} Form Submission from ${name}`,
+    subject: `New ${subjectSource} Form Submission from [${name} || ${email}]`,
     html: `
     <!DOCTYPE html>
     <html lang="en">
@@ -66,24 +74,33 @@ const sendEmail = async (req, res) => {
               <tr>
                 <td style="padding: 10px 30px 30px 30px;">
                   <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 16px; line-height: 1.6; color: #555555;">
-                    <tr>
-                      <td style="padding: 8px 0; font-weight: bold; width: 150px;">Name:</td>
-                      <td style="padding: 8px 0;">${name}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 8px 0; font-weight: bold;">Email:</td>
-                      <td style="padding: 8px 0;">${
-                        email || "Not provided"
-                      }</td>
-                    </tr>
-                    <tr>
+                    ${
+                      name
+                        ? `<tr><td style="padding: 8px 0; font-weight: bold;">Name:</td><td style="padding: 8px 0;">${name}</td></tr>`
+                        : ""
+                    }
+                    ${
+                      email
+                        ? `<tr><td style="padding: 8px 0; font-weight: bold;">Email:</td><td style="padding: 8px 0;">${email}</td></tr>`
+                        : ""
+                    }
+                    ${
+                      phone
+                        ? `<tr>
                       <td style="padding: 8px 0; font-weight: bold;">Phone:</td>
                       <td style="padding: 8px 0;">${
                         phone && typeof phone === "object"
                           ? `${phone.code} ${phone.number}`
                           : phone || "Not provided"
                       }</td>
-                    </tr>
+                    </tr>`
+                        : ""
+                    }
+                    ${
+                      pageUrl
+                        ? `<tr><td style="padding: 8px 0; font-weight: bold;">BlogURL:</td><td style="padding: 8px 0;">${pageUrl}</td></tr>`
+                        : ""
+                    }
                     ${
                       companyName
                         ? `<tr><td style="padding: 8px 0; font-weight: bold;">Company:</td><td style="padding: 8px 0;">${companyName}</td></tr>`
@@ -169,6 +186,7 @@ const sendEmailArcis = async (req, res) => {
     phone,
     company,
     formType,
+    pageUrl,
     location,
     customerType,
     camerasFor,
@@ -179,7 +197,8 @@ const sendEmailArcis = async (req, res) => {
   } = req.body;
 
   // --- CHANGE 1: Determine subject/title source from leadType ---
-  const subjectSource = leadType || "Website Lead";
+  // const subjectSource = leadType || "Website Lead";
+  const subjectSource = formType === "Blog" ? "Blog" : "Contact";
 
   try {
     const EMS_API_URL =
@@ -220,14 +239,14 @@ const sendEmailArcis = async (req, res) => {
       from: process.env.EMAIL_ARCIS_USER,
       to: process.env.RECEIVING_ARCIS_EMAIL,
       // --- CHANGE 2: Updated subject line ---
-      subject: `New Arcis ${subjectSource}: ${company || name}`,
+      subject: `New ${subjectSource} Form Submission from ${name}`,
       html: `
       <!DOCTYPE html>
       <html lang="en">
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <title>New ArcisAI ${subjectSource}</title>
+        <title>New ArcisAI ${subjectSource} Lead</title>
         <style>
           body { margin:0; padding:0; background:#f5f6fa; }
           table { border-collapse:collapse; }
@@ -237,7 +256,7 @@ const sendEmailArcis = async (req, res) => {
       </head>
       <body class="font" style="margin:0;padding:0;background:#f5f6fa;">
         <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;visibility:hidden;">
-          New ${subjectSource} submission from ${company || name}.
+          New ${subjectSource} submission from ${name}.
         </div>
         <table role="presentation" width="100%" bgcolor="#f5f6fa" style="background:#f5f6fa;">
           <tr>
@@ -252,7 +271,7 @@ const sendEmailArcis = async (req, res) => {
                 <tr>
                   <td align="center" style="padding:4px 32px 24px;">
                     <h1 class="font" style="margin:0;font-weight:700;font-size:22px;line-height:1.3;color:#111213;">
-                      New ${subjectSource} Submission
+                      New ${subjectSource} Lead
                     </h1>
                   </td>
                 </tr>
@@ -288,6 +307,14 @@ const sendEmailArcis = async (req, res) => {
                           ? `<tr>
                               <td class="font" align="right" width="160" style="width:160px; padding:8px 12px 8px 0; font-weight:700; color:#333333; text-align:right; border-bottom: 1px solid #f0f2f5;">Phone:</td>
                               <td class="font" align="left" style="padding:8px 0 8px 12px; color:#555555; text-align:left; border-bottom: 1px solid #f0f2f5;">${phone}</td>
+                            </tr>`
+                          : ""
+                      }
+                      ${
+                        pageUrl
+                          ? `<tr>
+                              <td class="font" align="right" width="160" style="width:160px; padding:8px 12px 8px 0; font-weight:700; color:#333333; text-align:right; border-bottom: 1px solid #f0f2f5;">PageUrl:</td>
+                              <td class="font" align="left" style="padding:8px 0 8px 12px; color:#555555; text-align:left; border-bottom: 1px solid #f0f2f5;">${pageUrl}</td>
                             </tr>`
                           : ""
                       }
@@ -396,7 +423,7 @@ const sendEmailArcis = async (req, res) => {
   }
 };
 
-// Career---VMUKTI/ARCIS
+// Career---VMUKTI/ARCIS ---CHANGES LOGO
 const sendCareerEmail = async (req, res) => {
   try {
     const {
@@ -530,7 +557,7 @@ const sendCareerEmail = async (req, res) => {
   }
 };
 
-// Career---ADIANCE
+// Career---ADIANCE ---PENDING
 const sendCareerEmailAdiance = async (req, res) => {
   try {
     const {

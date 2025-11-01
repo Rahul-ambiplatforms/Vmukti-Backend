@@ -175,11 +175,10 @@ exports.getBlogs = async (req, res) => {
     // Get search and sort parameters from query
     const searchTerm = req.query.search || "";
     const sortOrder = req.query.sort || "latest"; 
-    const status = req.query.status; // optional: 'draft' | 'published' | 'archived'
+    const status = req.query.status; 
 
     console.log("Search Term:", searchTerm);
     console.log("Sort Order:", sortOrder);
-    // --- Aggregation Pipeline ---
 
     // 1. Match Stage: Filter documents based on the search term (case-insensitive)
     const matchStage = {};
@@ -190,15 +189,12 @@ exports.getBlogs = async (req, res) => {
       matchStage["status"] = status;
     }
 
-    // 2. AddFields Stage: Create a new field latestDate to sort on.
-    // This field will be the later of updatedAt or createdAt.
     const addFieldsStage = {
       $addFields: {
         latestDate: { $max: ["$createdAt", "$updatedAt"] },
       },
     };
 
-    // 3. Sort Stage: Sort by the newly created latestDate field
     const sortStage = {
       $sort: {
         latestDate: sortOrder === "latest" ? -1 : 1, // -1 for descending, 1 for ascending
