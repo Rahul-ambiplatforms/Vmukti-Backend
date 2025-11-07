@@ -10,14 +10,18 @@ const sendEmail = async (req, res) => {
     fullName,
     email,
     phone,
-    message,
     formType,
+    leadType,
     pageUrl,
     country,
     city,
     businessProfile,
     companyName,
     inquiryType,
+    camerasFor,
+    customerQuantity,
+    customerType: customerTypeFromBody,
+    message,
   } = req.body;
 
   // console.log("Received form data initial:", req.body);
@@ -34,6 +38,55 @@ const sendEmail = async (req, res) => {
   // console.log("Received form data:", req.body);
 
   // console.log("EMAIL SEND TO", process.env.RECEIVING_EMAIL);
+  const customerType = customerTypeFromBody || businessProfile || "";
+  const camerasForValue = camerasFor || "";
+  const parsedCustomerQuantity =
+    customerQuantity === undefined || customerQuantity === "" || Number.isNaN(Number(customerQuantity))
+      ? null
+      : Math.max(0, Number(customerQuantity));
+  const industryType = camerasForValue || inquiryType || "";
+  const sanitizedPhone =
+    phone && typeof phone === "object"
+      ? `${phone.code || ""}${phone.number || ""}`.replace(/\s+/g, "")
+      : phone || "";
+
+  const EMS_API_URL =
+    "https://c-r-m-icr7b.ondigitalocean.app/backend/api/crmSales/createLead";
+  const leadData = {
+    name: fullName || "",
+    mobile: sanitizedPhone,
+    email: email || "",
+    company: companyName || "",
+    location: city || country || "",
+    industryType,
+    customerType,
+    leadType,
+    requirement: [],
+  };
+
+  if (parsedCustomerQuantity !== null) {
+    leadData.customerQuantity = parsedCustomerQuantity;
+  }
+
+  if (formType === "Contact") {
+    try {
+      console.log("Attempting to create lead in CRM:", leadData);
+
+      const response = await axios.post(EMS_API_URL, leadData);
+
+      console.log("Lead created successfully in CRM:", response.data || response.status);
+    } catch (apiError) {
+      console.error(
+        "CRITICAL: Failed to create lead in EMS API. The email will still be sent as a backup."
+      );
+      if (apiError.response) {
+        console.error("API Error Data:", apiError.response.data);
+        console.error("API Error Status:", apiError.response.status);
+      } else {
+        console.error("API Error Message:", apiError.message);
+      }
+    }
+  }
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
@@ -117,13 +170,23 @@ const sendEmail = async (req, res) => {
                         : ""
                     }
                     ${
-                      businessProfile
-                        ? `<tr><td style="padding: 8px 0; font-weight: bold;">Business Profile:</td><td style="padding: 8px 0;">${businessProfile}</td></tr>`
+                      customerType
+                        ? `<tr><td style="padding: 8px 0; font-weight: bold;">I am a:</td><td style="padding: 8px 0;">${customerType}</td></tr>`
                         : ""
                     }
                     ${
                       inquiryType
                         ? `<tr><td style="padding: 8px 0; font-weight: bold;">Inquiry Type:</td><td style="padding: 8px 0;">${inquiryType}</td></tr>`
+                        : ""
+                    }
+                    ${
+                      camerasForValue
+                        ? `<tr><td style="padding: 8px 0; font-weight: bold;">I want cameras for:</td><td style="padding: 8px 0;">${camerasForValue}</td></tr>`
+                        : ""
+                    }
+                    ${
+                      parsedCustomerQuantity !== null
+                        ? `<tr><td style="padding: 8px 0; font-weight: bold;">No. of Cameras Needed:</td><td style="padding: 8px 0;">${parsedCustomerQuantity}</td></tr>`
                         : ""
                     }
                   </table>
