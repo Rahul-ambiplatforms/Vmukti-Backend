@@ -41,7 +41,9 @@ const sendEmail = async (req, res) => {
   const customerType = customerTypeFromBody || businessProfile || "";
   const camerasForValue = camerasFor || "";
   const parsedCustomerQuantity =
-    customerQuantity === undefined || customerQuantity === "" || Number.isNaN(Number(customerQuantity))
+    customerQuantity === undefined ||
+    customerQuantity === "" ||
+    Number.isNaN(Number(customerQuantity))
       ? null
       : Math.max(0, Number(customerQuantity));
   const industryType = camerasForValue || inquiryType || "";
@@ -74,7 +76,10 @@ const sendEmail = async (req, res) => {
 
       const response = await axios.post(EMS_API_URL, leadData);
 
-      console.log("Lead created successfully in CRM:", response.data || response.status);
+      console.log(
+        "Lead created successfully in CRM:",
+        response.data || response.status
+      );
     } catch (apiError) {
       console.error(
         "CRITICAL: Failed to create lead in EMS API. The email will still be sent as a backup."
@@ -254,6 +259,7 @@ const sendEmailArcis = async (req, res) => {
     customerType,
     camerasFor,
     customerQuantity,
+    slot,
     message,
     leadType,
     updates,
@@ -378,6 +384,14 @@ const sendEmailArcis = async (req, res) => {
                           ? `<tr>
                               <td class="font" align="right" width="160" style="width:160px; padding:8px 12px 8px 0; font-weight:700; color:#333333; text-align:right; border-bottom: 1px solid #f0f2f5;">PageUrl:</td>
                               <td class="font" align="left" style="padding:8px 0 8px 12px; color:#555555; text-align:left; border-bottom: 1px solid #f0f2f5;">${pageUrl}</td>
+                            </tr>`
+                          : ""
+                      }
+                      ${
+                        slot
+                          ? `<tr>
+                              <td class="font" align="right" width="160" style="width:160px; padding:8px 12px 8px 0; font-weight:700; color:#333333; text-align:right; border-bottom: 1px solid #f0f2f5;">Slot:</td>
+                              <td class="font" align="left" style="padding:8px 0 8px 12px; color:#555555; text-align:left; border-bottom: 1px solid #f0f2f5;">${slot}</td>
                             </tr>`
                           : ""
                       }
