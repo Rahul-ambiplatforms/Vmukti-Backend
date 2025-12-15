@@ -245,7 +245,7 @@ const sendEmail = async (req, res) => {
   }
 };
 
-//---Contact/Blog form email---ARCIS
+//---Contact/Blog/Datasheet form email---ARCIS
 const sendEmailArcis = async (req, res) => {
   // Destructure all the fields from the request body
   const {
@@ -263,12 +263,18 @@ const sendEmailArcis = async (req, res) => {
     message,
     leadType,
     updates,
+    downloadUrl,
   } = req.body;
 
-  // --- CHANGE 1: Determine subject/title source from leadType ---
-  // const subjectSource = leadType || "Website Lead";
-  const subjectSource = formType === "Blog" ? "Blog" : "Contact";
+  // console.log("FORM TYPE AT THE TOP:::", formType);
+  const subjectSource =
+    formType === "Blog"
+      ? "Blog"
+      : formType === "Contact"
+      ? "Contact"
+      : "Datasheet";
 
+  // console.log("SUBJECT SOURCE at the top:", subjectSource);
   try {
     const EMS_API_URL =
       "https://c-r-m-icr7b.ondigitalocean.app/backend/api/crmSales/createLead";
@@ -284,6 +290,13 @@ const sendEmailArcis = async (req, res) => {
       requirement: [],
       customerQuantity: customerQuantity,
     };
+
+    // if (formType === "Datasheet Form") {
+    //   console.log("FORM TYPE inside", formType);
+    // } else {
+    //   console.log("FORM TYPE in else", formType);
+    // }
+
     if (formType === "Contact") {
       try {
         console.log("Attempting to create lead in EMS:", leadData);
@@ -384,6 +397,14 @@ const sendEmailArcis = async (req, res) => {
                           ? `<tr>
                               <td class="font" align="right" width="160" style="width:160px; padding:8px 12px 8px 0; font-weight:700; color:#333333; text-align:right; border-bottom: 1px solid #f0f2f5;">PageUrl:</td>
                               <td class="font" align="left" style="padding:8px 0 8px 12px; color:#555555; text-align:left; border-bottom: 1px solid #f0f2f5;">${pageUrl}</td>
+                            </tr>`
+                          : ""
+                      }
+                      ${
+                        downloadUrl
+                          ? `<tr>
+                              <td class="font" align="right" width="160" style="width:160px; padding:8px 12px 8px 0; font-weight:700; color:#333333; text-align:right; border-bottom: 1px solid #f0f2f5;">PDF Downloaded:</td>
+                              <td class="font" align="left" style="padding:8px 0 8px 12px; color:#555555; text-align:left; border-bottom: 1px solid #f0f2f5;">${downloadUrl}</td>
                             </tr>`
                           : ""
                       }
