@@ -19,6 +19,10 @@ out/cache/
 .env.production.local
 .env.test.local
 
+# Google Cloud credentials
+config/google-credentials.json
+**/google-credentials.json
+
 
 # Logs & temp files
 logs/
