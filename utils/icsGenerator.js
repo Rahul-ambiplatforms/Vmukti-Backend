@@ -6,19 +6,20 @@ class ICSGenerator {
         try {
             const { fullName, email, selectedDate, selectedTime, message } = eventDetails;
 
-            // Parse the date and time in IST
+            // Parse the date and time in IST and convert to UTC
             const eventDateTime = moment.tz(`${selectedDate} ${selectedTime}`, 'MMMM DD, YYYY h:mm A', 'Asia/Kolkata');
+            const eventDateTimeUTC = eventDateTime.utc();
 
-            // Convert to array format required by ics library
+            // Convert to array format required by ics library (in UTC)
             const startArray = [
-                eventDateTime.year(),
-                eventDateTime.month() + 1, // ics expects 1-based months
-                eventDateTime.date(),
-                eventDateTime.hour(),
-                eventDateTime.minute()
+                eventDateTimeUTC.year(),
+                eventDateTimeUTC.month() + 1, // ics expects 1-based months
+                eventDateTimeUTC.date(),
+                eventDateTimeUTC.hour(),
+                eventDateTimeUTC.minute()
             ];
 
-            const endDateTime = eventDateTime.clone().add(30, 'minutes');
+            const endDateTime = eventDateTimeUTC.clone().add(30, 'minutes');
             const endArray = [
                 endDateTime.year(),
                 endDateTime.month() + 1,
@@ -31,7 +32,7 @@ class ICSGenerator {
                 start: startArray,
                 end: endArray,
                 title: `Demo Meeting with ${fullName}`,
-                description: `Demo meeting scheduled with ${fullName} (${email})\\n\\nRequirements: ${message || 'No specific requirements mentioned'}\\n\\nJoin Google Meet: ${meetLink}`,
+                description: `Demo meeting scheduled with ${fullName} (${email})\\n\\nRequirements: ${message || 'No specific requirements mentioned'}\\n\\nJoin Meeting: ${meetLink}`,
                 location: meetLink,
                 url: meetLink,
                 geo: { lat: 40.0095, lon: 105.2669 },
@@ -73,9 +74,10 @@ class ICSGenerator {
         // Fallback simple ICS generation if the main method fails
         const { fullName, email, selectedDate, selectedTime, message } = eventDetails;
         const eventDateTime = moment.tz(`${selectedDate} ${selectedTime}`, 'MMMM DD, YYYY h:mm A', 'Asia/Kolkata');
+        const eventDateTimeUTC = eventDateTime.utc();
 
-        const startTime = eventDateTime.format('YYYYMMDDTHHmmss');
-        const endTime = eventDateTime.clone().add(30, 'minutes').format('YYYYMMDDTHHmmss');
+        const startTime = eventDateTimeUTC.format('YYYYMMDDTHHmmss') + 'Z';
+        const endTime = eventDateTimeUTC.clone().add(30, 'minutes').format('YYYYMMDDTHHmmss') + 'Z';
         const uid = `demo-${Date.now()}@vmukti.com`;
 
         return `BEGIN:VCALENDAR
@@ -85,10 +87,10 @@ CALSCALE:GREGORIAN
 METHOD:REQUEST
 BEGIN:VEVENT
 UID:${uid}
-DTSTART;TZID=Asia/Kolkata:${startTime}
-DTEND;TZID=Asia/Kolkata:${endTime}
+DTSTART:${startTime}
+DTEND:${endTime}
 SUMMARY:Demo Meeting with ${fullName}
-DESCRIPTION:Demo meeting scheduled with ${fullName} (${email})\\n\\nRequirements: ${message || 'No specific requirements mentioned'}\\n\\nJoin Google Meet: ${meetLink}
+DESCRIPTION:Demo meeting scheduled with ${fullName} (${email})\\n\\nRequirements: ${message || 'No specific requirements mentioned'}\\n\\nJoin Meeting: ${meetLink}
 LOCATION:${meetLink}
 ORGANIZER;CN=VMukti Sales Team:mailto:${process.env.RECEIVING_EMAIL}
 ATTENDEE;CN=${fullName};RSVP=TRUE:mailto:${email}
