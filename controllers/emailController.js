@@ -35,7 +35,9 @@ const sendEmail = async (req, res) => {
       ? "Blog"
       : formType === "Contact"
         ? "Contact"
-        : "VMS Demo";
+        : formType === "Demo Booking"
+        ? "VMS Demo"
+        : "Newsletter";
 
   // console.log("Received form data:", req.body);
 
@@ -531,6 +533,8 @@ const sendEmailArcis = async (req, res) => {
       ? "Blog"
       : formType === "Contact"
         ? "Contact"
+        : formType === "Event" 
+        ? "Event Booking"
         : "Datasheet";
 
   // console.log("SUBJECT SOURCE at the top:", subjectSource);
