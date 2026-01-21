@@ -35,7 +35,7 @@ const sendEmail = async (req, res) => {
       ? "Blog"
       : formType === "Contact"
         ? "Contact"
-        : "Newsletter";
+        : "VMS Demo";
 
   // console.log("Received form data:", req.body);
 
@@ -56,6 +56,7 @@ const sendEmail = async (req, res) => {
 
   // Zoom Meeting Integration for Demo Booking
   let meetLink = null;
+  let hostStartLink = null;
   let icsContent = null;
   let meetingPlatform = null;
 
@@ -75,8 +76,11 @@ const sendEmail = async (req, res) => {
         });
 
         if (zoomResult.success) {
-          meetLink = zoomResult.joinUrl;
+          meetLink = zoomResult.joinUrl;  // Participant link for user
+          hostStartLink = zoomResult.startUrl;  // Host link for admin
           meetingPlatform = 'Zoom';
+        } else {
+          console.error('Zoom meeting creation failed:', zoomResult.error);
         }
       }
 
@@ -252,7 +256,10 @@ const sendEmail = async (req, res) => {
         : ""
       }
                     ${meetLink
-        ? `<tr><td style="padding: 8px 0; font-weight: bold;">${meetingPlatform} Meeting Link:</td><td style="padding: 8px 0;"><a href="${meetLink}" style="color: #1a73e8; text-decoration: none;">${meetLink}</a></td></tr>`
+        ? `<tr><td style="padding: 8px 0; font-weight: bold;">Meeting Links:</td><td style="padding: 8px 0;">
+             <a href="${hostStartLink}" style="color: #1a73e8; text-decoration: none; font-weight: bold;">Join Meeting (Host)</a><br>
+             <a href="${meetLink}" style="color: #1a73e8; text-decoration: none;">Join Meeting (Customer)</a>
+           </td></tr>`
         : `<tr><td style="padding: 8px 0; font-weight: bold;">Meeting Link:</td><td style="padding: 8px 0; color: #f57c00;">Will be provided by sales team</td></tr>`
       }
                     ${mobileNumber
@@ -411,7 +418,7 @@ const sendEmail = async (req, res) => {
 
                 ${meetLink
             ? `<tr>
-                      <td style="padding: 8px 0; font-weight: bold;">${meetingPlatform} Link:</td>
+                      <td style="padding: 8px 0; font-weight: bold;">Meeting Link:</td>
                       <td style="padding: 8px 0;">
                         <a href="${meetLink}" style="color: #1a73e8; text-decoration: none;">Join Meeting</a>
                       </td>
