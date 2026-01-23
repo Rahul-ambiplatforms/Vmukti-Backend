@@ -60,6 +60,7 @@ const sendEmail = async (req, res) => {
   let meetLink = null;
   let hostStartLink = null;
   let icsContent = null;
+  let adminIcsContent = null;
   let meetingPlatform = null;
 
   if (formType === "Demo Booking" && selectedDate && selectedTime) {
@@ -93,7 +94,7 @@ const sendEmail = async (req, res) => {
         selectedDate,
         selectedTime,
         message
-      }, meetLink || "Meeting link will be provided by sales team");
+      }, meetLink || "Meeting link will be provided by sales team", false); // false = for user
 
       if (!icsContent) {
         icsContent = ICSGenerator.generateSimpleICS({
@@ -102,7 +103,26 @@ const sendEmail = async (req, res) => {
           selectedDate,
           selectedTime,
           message
-        }, meetLink || "Meeting link will be provided by sales team");
+        }, meetLink || "Meeting link will be provided by sales team", false); // false = for user
+      }
+
+      // Generate separate ICS for admin/organizer
+      adminIcsContent = ICSGenerator.generateCalendarInvite({
+        fullName: name,
+        email,
+        selectedDate,
+        selectedTime,
+        message
+      }, meetLink || "Meeting link will be provided by sales team", true); // true = for organizer
+
+      if (!adminIcsContent) {
+        adminIcsContent = ICSGenerator.generateSimpleICS({
+          fullName: name,
+          email,
+          selectedDate,
+          selectedTime,
+          message
+        }, meetLink || "Meeting link will be provided by sales team", true); // true = for organizer
       }
 
     } catch (error) {
@@ -115,7 +135,16 @@ const sendEmail = async (req, res) => {
         selectedDate,
         selectedTime,
         message
-      }, "Meeting link will be provided by sales team");
+      }, "Meeting link will be provided by sales team", false); // false = for user
+      
+      // Generate admin ICS as fallback
+      adminIcsContent = ICSGenerator.generateSimpleICS({
+        fullName: name,
+        email,
+        selectedDate,
+        selectedTime,
+        message
+      }, "Meeting link will be provided by sales team", true); // true = for organizer
     }
   }
 
@@ -299,11 +328,11 @@ const sendEmail = async (req, res) => {
     </body>
     </html>
     `,
-    attachments: icsContent ? [
+    attachments: adminIcsContent ? [
       {
         filename: `demo-meeting-${name.replace(/\s+/g, '-').toLowerCase()}.ics`,
-        content: icsContent,
-        contentType: 'text/calendar; charset=utf-8; method=REQUEST'
+        content: adminIcsContent,
+        contentType: 'text/calendar; charset=utf-8; method=PUBLISH'
       }
     ] : []
   };
