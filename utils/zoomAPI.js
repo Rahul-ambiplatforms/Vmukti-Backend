@@ -64,14 +64,14 @@ class ZoomAPIService {
         settings: {
           host_video: true,
           participant_video: true,
-          join_before_host: false,
+          join_before_host: true,
           mute_upon_entry: true,
           watermark: false,
           use_pmi: false,
           approval_type: 0, // Automatically approve
           audio: 'both',
           auto_recording: 'none',
-          waiting_room: true
+          waiting_room: false
         }
       };
 
