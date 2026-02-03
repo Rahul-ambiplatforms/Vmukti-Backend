@@ -39,6 +39,8 @@ const sendEmail = async (req, res) => {
         ? "VMS Demo"
         : formType === "US Inquiry"
         ? "US Inquiry"
+        : formType === "UK Inquiry"
+        ? "UK Inquiry"
         : "Newsletter";
 
   // console.log("Received form data:", req.body);
@@ -294,6 +296,115 @@ const sendEmail = async (req, res) => {
                 <td style="padding: 25px 30px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-top: 1px solid #dddddd; text-align: center; border-radius: 0 0 12px 12px;">
                   <p style="font-size: 14px; color: #666; margin: 0 0 5px 0; font-weight: 500;">🇺🇸 US Market Lead - Priority Handling Required</p>
                   <p style="font-size: 12px; color: #999999; margin: 0;">This is an automated notification from VMukti US. Please do not reply directly to this email.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+    `;
+  } else if (formType === "UK Inquiry") {
+    // UK Inquiry specific template
+    emailTemplate = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        .uk-header { background: linear-gradient(135deg, #4A90B8 0%, #3F77A5 100%); }
+        .uk-accent { color: #2C5A7D; }
+      </style>
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f4f4f4;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td style="padding: 20px 0;">
+            <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; background-color: #ffffff; border: 1px solid #dddddd; border-radius: 12px; overflow: hidden;">
+              
+              <!-- UK Header with Logo -->
+              <tr>
+                <td class="uk-header" align="center" style="padding: 30px 0; background: #ffffff">
+                  <img src="https://vmukti.com/assets/VMukti_logo.png" alt="VMukti Logo" width="160" style="display: block;" />
+                  <h2 style="color: black; margin: 15px 0 0 0; font-size: 18px; font-weight: 500;">UK Market Inquiry</h2>
+                </td>
+              </tr>
+              
+              <!-- Title -->
+              <tr>
+                <td style="padding: 25px 30px 0px 30px;">
+                  <h1 style="font-size: 26px; margin: 0; color: #333333; text-align: center;">New <span class="uk-accent" style="color: #2C5A7D;">UK Inquiry</span> Lead</h1>
+                  <p style="text-align: center; color: #666; margin: 8px 0 0 0; font-size: 14px;">From VMukti UK Homepage</p>
+                  <hr style="margin: 20px 0; border: 0; border-top: 2px solid #4A90B8;">
+                </td>
+              </tr>
+              
+              <!-- Submission Details -->
+              <tr>
+                <td style="padding: 10px 30px 30px 30px;">
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 16px; line-height: 1.6; color: #555555;">
+                    ${name
+        ? `<tr><td style="padding: 10px 0; font-weight: bold; color: #4A90B8; border-bottom: 1px solid #f0f0f0;">Full Name:</td><td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">${name}</td></tr>`
+        : ""
+      }
+                    ${email
+        ? `<tr><td style="padding: 10px 0; font-weight: bold; color: #4A90B8; border-bottom: 1px solid #f0f0f0;">Email Address:</td><td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">${email}</td></tr>`
+        : ""
+      }
+                    ${phone
+        ? `<tr>
+                      <td style="padding: 10px 0; font-weight: bold; color: #4A90B8; border-bottom: 1px solid #f0f0f0;">Phone Number:</td>
+                      <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">${phone && typeof phone === "object"
+          ? `${phone.code} ${phone.number}`
+          : phone || "Not provided"
+        }</td>
+                    </tr>`
+        : ""
+      }
+                    ${companyName
+        ? `<tr><td style="padding: 10px 0; font-weight: bold; color: #4A90B8; border-bottom: 1px solid #f0f0f0;">Business Name:</td><td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">${companyName}</td></tr>`
+        : ""
+      }
+                    ${country
+        ? `<tr><td style="padding: 10px 0; font-weight: bold; color: #4A90B8; border-bottom: 1px solid #f0f0f0;">Country:</td><td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">${country}</td></tr>`
+        : ""
+      }
+                    ${city
+        ? `<tr><td style="padding: 10px 0; font-weight: bold; color: #4A90B8; border-bottom: 1px solid #f0f0f0;">City:</td><td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">${city}</td></tr>`
+        : ""
+      }
+                    ${leadType
+        ? `<tr><td style="padding: 10px 0; font-weight: bold; color: #4A90B8; border-bottom: 1px solid #f0f0f0;">Lead Source:</td><td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">${leadType}</td></tr>`
+        : ""
+      }
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Message Section -->
+              ${message
+        ? `
+              <tr>
+                <td style="padding: 0 30px 30px 30px;">
+                   <hr style="margin: 0 0 20px 0; border: 0; border-top: 1px solid #eeeeee;">
+                  <p style="font-size: 16px; margin: 0 0 10px 0; color: #4A90B8; font-weight: bold;">Customer Message:</p>
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #2C5A7D;">
+                    <p style="font-size: 16px; line-height: 1.6; color: #555555; margin: 0; white-space: pre-wrap;">${message}</p>
+                  </div>
+                </td>
+              </tr>
+              `
+        : ""
+      }
+              
+              <!-- UK Footer -->
+              <tr>
+                <td style="padding: 25px 30px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-top: 1px solid #dddddd; text-align: center; border-radius: 0 0 12px 12px;">
+                  <p style="font-size: 14px; color: #666; margin: 0 0 5px 0; font-weight: 500;">🇬🇧 UK Market Lead - Priority Handling Required</p>
+                  <p style="font-size: 12px; color: #999999; margin: 0;">This is an automated notification from VMukti UK. Please do not reply directly to this email.</p>
                 </td>
               </tr>
             </table>
