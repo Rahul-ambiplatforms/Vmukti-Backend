@@ -36,12 +36,12 @@ const sendEmail = async (req, res) => {
       : formType === "Contact"
         ? "Contact"
         : formType === "Demo Booking"
-        ? "VMS Demo"
-        : formType === "US Inquiry"
-        ? "US Inquiry"
-        : formType === "UK Inquiry"
-        ? "UK Inquiry"
-        : "Newsletter";
+          ? "VMS Demo"
+          : formType === "US Inquiry"
+            ? "US Inquiry"
+            : formType === "UK Inquiry"
+              ? "UK Inquiry"
+              : "Newsletter";
 
   // console.log("Received form data:", req.body);
 
@@ -140,7 +140,7 @@ const sendEmail = async (req, res) => {
         selectedTime,
         message
       }, "Meeting link will be provided by sales team", false); // false = for user
-      
+
       // Generate admin ICS as fallback
       adminIcsContent = ICSGenerator.generateSimpleICS({
         fullName: name,
@@ -195,7 +195,7 @@ const sendEmail = async (req, res) => {
 
   // Create different email templates based on form type
   let emailTemplate;
-  
+
   if (formType === "US Inquiry") {
     // US Inquiry specific template
     emailTemplate = `
@@ -779,11 +779,14 @@ const sendEmailArcis = async (req, res) => {
     customerType,
     camerasFor,
     customerQuantity,
+    InterestedAs,
     slot,
     message,
     leadType,
     updates,
     downloadUrl,
+    state,
+    city,
   } = req.body;
 
   // console.log("FORM TYPE AT THE TOP:::", formType);
@@ -792,9 +795,11 @@ const sendEmailArcis = async (req, res) => {
       ? "Blog"
       : formType === "Contact"
         ? "Contact"
-        : formType === "Event" 
-        ? "Event Booking"
-        : "Datasheet";
+        : formType === "Event"
+          ? "Event Booking"
+          : formType === "Partner Inquiry"
+            ? "Partner Inquiry"
+            : "Datasheet";
 
   // console.log("SUBJECT SOURCE at the top:", subjectSource);
   try {
@@ -805,7 +810,7 @@ const sendEmailArcis = async (req, res) => {
       mobile: phone,
       email: email,
       company: company,
-      location: location,
+      location: location || `${city || ""} ${state || ""}`.trim(),
       industryType: camerasFor,
       customerType: customerType,
       leadType: leadType,
@@ -1005,6 +1010,79 @@ const sendEmailArcis = async (req, res) => {
     `,
     };
 
+
+    let emailHTML;
+
+    if (formType === "Partner Inquiry") {
+      emailHTML = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width,initial-scale=1" />
+            <title>New ArcisAI Partner Inquiry</title>
+            <style>
+              body { margin:0; padding:0; background:#f5f6fa; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; }
+            </style>
+            </head>
+            <body>
+            <table width="100%" bgcolor="#f5f6fa" cellpadding="0" cellspacing="0">
+            <tr>
+            <td align="center" style="padding:32px 12px;">
+            <table width="600" style="background:#ffffff;border-radius:16px;box-shadow:0 1px 0 rgba(0,0,0,0.05);" cellpadding="0" cellspacing="0">
+
+            <tr>
+            <td align="center" style="padding:28px;">
+            <img src="https://arcisai.io/images/ArcisAi.png" width="140" alt="ArcisAI" />
+            <h2 style="margin:16px 0 0;color:#111;">New Partner Inquiry</h2>
+            <p style="margin:6px 0 0;color:#6b7280;">ArcisAI Partnership Request</p>
+            </td>
+            </tr>
+
+            <tr>
+            <td style="padding:0 32px 24px;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="font-size:15px;color:#333;">
+            <tr><td style="padding:10px 0;font-weight:600;width:180px;">Name</td><td>${name}</td></tr>
+            <tr><td style="padding:10px 0;font-weight:600;">Email</td><td>${email}</td></tr>
+            <tr><td style="padding:10px 0;font-weight:600;">Phone</td><td>${phone || "N/A"}</td></tr>
+            <tr><td style="padding:10px 0;font-weight:600;">Company</td><td>${company || "N/A"}</td></tr>
+            
+            <tr><td style="padding:10px 0;font-weight:600;">Location</td><td>${state || "N/A"}</td></tr>
+            <tr><td style="padding:10px 0;font-weight:600;">Interested As</td><td>${InterestedAs || "N/A"}</td></tr>
+            <tr><td style="padding:10px 0;font-weight:600;">Lead Source</td><td>${leadType}</td></tr>
+            <tr><td style="padding:10px 0;font-weight:600;">Wants Updates</td><td>${updates ? "Yes" : "No"}</td></tr>
+            </table>
+            </td>
+            </tr>
+
+            ${message ? `
+            <tr>
+            <td style="padding:0 32px 24px;">
+            <hr style="border:none;border-top:1px solid #eee;margin-bottom:12px;" />
+            <p style="font-weight:600;margin:0 0 6px;">Message</p>
+            <p style="margin:0;color:#555;white-space:pre-wrap;">${message}</p>
+            </td>
+            </tr>
+            ` : ""}
+
+            <tr>
+            <td align="center" style="padding:20px;color:#8a9099;font-size:13px;border-top:1px solid #f0f2f5;">
+            © 2025 ArcisAI · Partner Inquiry
+            </td>
+            </tr>
+
+            </table>
+            </td>
+            </tr>
+            </table>
+            </body>
+            </html>
+            `;
+
+      mailOptions.html = emailHTML;
+    }
+
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -1012,7 +1090,6 @@ const sendEmailArcis = async (req, res) => {
         pass: process.env.EMAIL_ARCIS_PASSWORD,
       },
     });
-
     await transporter.sendMail(mailOptions);
 
     // Send the final success response to the frontend
