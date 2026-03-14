@@ -29,7 +29,7 @@ const sendEmail = async (req, res) => {
   // console.log("Received form data initial:", req.body);
   let name = "";
   if (fullName) name = fullName;
-
+  
   const subjectSource =
     formType === "Blog"
       ? "Blog"
@@ -153,7 +153,7 @@ const sendEmail = async (req, res) => {
   }
 
   const EMS_API_URL =
-    "https://c-r-m-icr7b.ondigitalocean.app/backend/api/crmSales/createLead";
+    "https://crm.arcisai.io/backend/api/v1/crmSales/createLead";
   const leadData = {
     name: fullName || "",
     mobile: sanitizedPhone,
@@ -804,7 +804,7 @@ const sendEmailArcis = async (req, res) => {
   // console.log("SUBJECT SOURCE at the top:", subjectSource);
   try {
     const EMS_API_URL =
-      "https://c-r-m-icr7b.ondigitalocean.app/backend/api/crmSales/createLead";
+      "https://crm.arcisai.io/backend/api/v1/crmSales/createLead";
     const leadData = {
       name: name,
       mobile: phone,
