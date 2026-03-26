@@ -162,7 +162,7 @@ const sendEmail = async (req, res) => {
     location: city || country || "",
     industryType,
     customerType,
-    leadType,
+    source: leadType || formType || "Website",
     requirement: [],
   };
 
@@ -813,7 +813,7 @@ const sendEmailArcis = async (req, res) => {
       location: location || `${city || ""} ${state || ""}`.trim(),
       industryType: camerasFor,
       customerType: customerType,
-      leadType: leadType,
+      source: leadType,
       requirement: [],
       customerQuantity: customerQuantity,
     };
