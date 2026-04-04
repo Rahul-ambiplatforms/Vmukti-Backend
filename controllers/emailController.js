@@ -163,8 +163,11 @@ const sendEmail = async (req, res) => {
     industryType,
     customerType,
     source: leadType || formType || "Website",
+    domain: "VMukti",
     requirement: [],
   };
+
+  console.log(leadData);
 
   if (parsedCustomerQuantity !== null) {
     leadData.customerQuantity = parsedCustomerQuantity;
@@ -815,6 +818,7 @@ const sendEmailArcis = async (req, res) => {
       customerType: customerType,
       source: leadType,
       requirement: [],
+      domain: "ArcisAI",
       customerQuantity: customerQuantity,
     };
 
