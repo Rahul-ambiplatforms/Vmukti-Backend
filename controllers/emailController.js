@@ -173,7 +173,7 @@ const sendEmail = async (req, res) => {
     leadData.customerQuantity = parsedCustomerQuantity;
   }
 
-  if (formType === "Contact") {
+  if (formType === "Contact" || formType === "Demo Booking") {
     try {
       console.log("Attempting to create lead in CRM:", leadData);
 
