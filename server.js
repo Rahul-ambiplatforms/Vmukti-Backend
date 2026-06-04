@@ -11,7 +11,16 @@ const tenant = require("./middlewares/tenant");
 const app = express();
 
 // Middleware
-app.use(cors());
+// Allow the custom x-tenant header through CORS preflight so browser clients
+// (admin + public site) can explicitly resolve the tenant from any origin,
+// including localhost where the Referer doesn't include "arcis".
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "x-tenant", "X-Tenant"],
+  })
+);
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
@@ -52,11 +61,13 @@ const authRoutes = require("./routes/authRoutes");
 const blogRoutes = require("./routes/blogRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const jobRoutes = require("./routes/jobRoutes");
+const newsRoutes = require("./routes/newsRoutes");
 app.use("/api", emailRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/files", fileRoutes);
 app.use("/api/jobs", jobRoutes);
+app.use("/api/news", newsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
