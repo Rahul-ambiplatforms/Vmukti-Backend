@@ -664,6 +664,14 @@ const sendEmail = async (req, res) => {
                   <td style="padding: 8px 0;">30 minutes</td>
                 </tr>
 
+                ${companyName
+            ? `<tr>
+                      <td style="padding: 8px 0; font-weight: bold;">Company:</td>
+                      <td style="padding: 8px 0;">${companyName}</td>
+                    </tr>`
+            : ""
+          }
+
                 ${mobileNumber
             ? `<tr>
                       <td style="padding: 8px 0; font-weight: bold;">Contact Number:</td>
